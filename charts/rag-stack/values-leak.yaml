@@ -1,0 +1,6 @@
+# 회귀 게이트 시연용으로 일부러 넣는 누출. after 위에 겹쳐 쓴다.
+# RAG 앱이 기동할 때 example.com(문서용 예약 도메인)에 GET을 한 번 보낸다.
+components:
+  rag:
+    env:
+      LEAK_PROBE_URL: https://example.com/

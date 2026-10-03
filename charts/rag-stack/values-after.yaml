@@ -1,0 +1,10 @@
+# 완화(after). before 감사에서 관찰한 외부 호출을 하나씩 막는다. 근거는 reports/<run-id>/REPORT.md.
+components:
+  embed:
+    # 허브 모델 ID 대신 로컬 디렉터리를 주면 TEI는 허브 API를 만들지 않는다
+    # (router/src/lib.rs v1.9.4: model_id 경로가 존재하는 디렉터리이면 로컬 모델로 처리).
+    args: ["--model-id", "/data/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3"]
+  qdrant:
+    env:
+      # https://qdrant.tech/documentation/guides/usage-statistics/ 의 비활성화 방법
+      QDRANT__TELEMETRY_DISABLED: "true"
