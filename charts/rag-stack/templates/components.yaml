@@ -1,0 +1,88 @@
+{{- /* 구성 요소마다 Deployment와 Service를 하나씩 만든다. 이름이 곧 서비스 DNS 이름이다. */ -}}
+{{- range $name, $c := .Values.components }}
+{{- if $c.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "rag-stack.labels" $ | nindent 4 }}
+    {{- include "rag-stack.selector" (dict "root" $ "name" $name) | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "rag-stack.selector" (dict "root" $ "name" $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rag-stack.labels" $ | nindent 8 }}
+        {{- include "rag-stack.selector" (dict "root" $ "name" $name) | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: {{ $name }}
+          image: {{ $c.image | quote }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          {{- with $c.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $c.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $c.env }}
+          env:
+            {{- range $k, $v := . }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $c.port }}
+          startupProbe:
+            httpGet:
+              path: {{ $c.healthPath }}
+              port: http
+            periodSeconds: 5
+            failureThreshold: {{ $c.startupFailureThreshold | default 60 }}
+          readinessProbe:
+            httpGet:
+              path: {{ $c.healthPath }}
+              port: http
+            periodSeconds: 5
+          {{- with $c.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $c.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $c.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "rag-stack.labels" $ | nindent 4 }}
+    {{- include "rag-stack.selector" (dict "root" $ "name" $name) | nindent 4 }}
+spec:
+  selector:
+    {{- include "rag-stack.selector" (dict "root" $ "name" $name) | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ $c.servicePort | default $c.port }}
+      targetPort: http
+{{- end }}
+{{- end }}

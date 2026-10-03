@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rag-stack
+description: 외부 호출 감사 대상 RAG 스택(llama-server, TEI, Qdrant, RAG 앱)과 기본 거부 egress 정책
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
