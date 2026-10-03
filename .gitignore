@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# 반입 대상 모델 파일(용량이 크다). scripts/fetch_models.sh로 다시 받는다.
+models/
+
+# 감사 원자료. 정리한 사본은 reports/<run-id>/에 둔다.
+results/
+
+.env
+*.kubeconfig
+.DS_Store
+.omc/
