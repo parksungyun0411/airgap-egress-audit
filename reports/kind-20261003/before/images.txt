@@ -1,0 +1,20 @@
+IMAGE                                           TAG                  DIGEST              IMAGE ID            SIZE
+docker.io/library/import-2026-10-03             <none>               092e0d6f70b39       44136fa355b36       63.3kB
+docker.io/kindest/kindnetd                      v20260820-69b56db7   <none>              8e13ccc0aaa68       35.7MB
+docker.io/kindest/local-path-helper             v20260131-7181c60a   <none>              8f375e9f93513       2.74MB
+docker.io/kindest/local-path-provisioner        v20260820-69b56db7   <none>              0771a8a05619f       14.2MB
+docker.io/library/airgap-rag-app                0.1.0                70377e923beeb       1913264e78afc       85.6MB
+docker.io/qdrant/qdrant                         v1.19.1              ee213d6ad5baf       76beb9a87e28a       73.6MB
+ghcr.io/ggml-org/llama.cpp                      server-b11347        691461af802b7       91fc64651d167       298MB
+ghcr.io/huggingface/text-embeddings-inference   cpu-arm64-1.9.4      41c578aadfb42       79cc625ff7e86       117MB
+registry.k8s.io/coredns/coredns                 v1.14.6              <none>              fbccbf70a429f       21.2MB
+registry.k8s.io/etcd                            3.7.0-0              <none>              c2e426bbd1cd6       20.5MB
+registry.k8s.io/kube-apiserver-arm64            v1.37.0              4fbbef5581e6e       6003d52023b9d       97.1MB
+registry.k8s.io/kube-apiserver                  v1.37.0              4fbbef5581e6e       6003d52023b9d       97.1MB
+registry.k8s.io/kube-controller-manager-arm64   v1.37.0              dda35f6553455       b1ad0e33c9012       85.1MB
+registry.k8s.io/kube-controller-manager         v1.37.0              dda35f6553455       b1ad0e33c9012       85.1MB
+registry.k8s.io/kube-proxy-arm64                v1.37.0              d5e740cce9591       550b682d81d41       84.5MB
+registry.k8s.io/kube-proxy                      v1.37.0              d5e740cce9591       550b682d81d41       84.5MB
+registry.k8s.io/kube-scheduler-arm64            v1.37.0              2aa78b45454b3       384eabc4fe526       59.1MB
+registry.k8s.io/kube-scheduler                  v1.37.0              2aa78b45454b3       384eabc4fe526       59.1MB
+registry.k8s.io/pause                           3.10                 <none>              afb61768ce381       268kB

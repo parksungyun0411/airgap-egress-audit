@@ -1,0 +1,94 @@
+COMPUTED VALUES:
+components:
+  embed:
+    args:
+    - --model-id
+    - /data/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3
+    enabled: true
+    env:
+      HUGGINGFACE_HUB_CACHE: /data
+    healthPath: /health
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-arm64-1.9.4
+    port: 80
+    resources:
+      limits:
+        cpu: "2"
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    startupFailureThreshold: 240
+    volumeMounts:
+    - mountPath: /data
+      name: hf-cache
+    volumes:
+    - hostPath:
+        path: /models/hf-cache
+        type: Directory
+      name: hf-cache
+  llm:
+    args:
+    - -m
+    - /models/kanana-1.5-2.1b-instruct-q4_k_m.gguf
+    - --host
+    - 0.0.0.0
+    - --port
+    - "8080"
+    - -c
+    - "2048"
+    - -t
+    - "2"
+    enabled: true
+    healthPath: /health
+    image: ghcr.io/ggml-org/llama.cpp:server-b11347
+    port: 8080
+    resources:
+      limits:
+        cpu: "2"
+        memory: 3Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    volumeMounts:
+    - mountPath: /models
+      name: models
+      readOnly: true
+    volumes:
+    - hostPath:
+        path: /models
+        type: Directory
+      name: models
+  qdrant:
+    enabled: true
+    env:
+      QDRANT__TELEMETRY_DISABLED: "true"
+    healthPath: /readyz
+    image: qdrant/qdrant:v1.19.1
+    port: 6333
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  rag:
+    enabled: true
+    env:
+      EMBED_URL: http://embed:80
+      LEAK_PROBE_URL: https://example.com/
+      LLM_URL: http://llm:8080
+      QDRANT_URL: http://qdrant:6333
+    healthPath: /health
+    image: airgap-rag-app:0.1.0
+    port: 8000
+    resources:
+      limits:
+        cpu: "1"
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+imagePullPolicy: Never
+networkPolicy:
+  enabled: true

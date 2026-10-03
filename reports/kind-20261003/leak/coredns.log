@@ -1,0 +1,30 @@
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.073563881Z maxprocs: Leaving GOMAXPROCS=4: CPU quota undefined
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.174943343Z .:53
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.174988677Z [INFO] plugin/reload: Running configuration SHA512 = 2dd49c56b94cd5672aafc99f92d4b5ff824b6ae87878b18330ea3f5199d47baffba03feab068065d91ea11f9ff9de9eb155741708e79bfb0228360463ef6dbde
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.174993469Z CoreDNS-1.14.6
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.174994802Z linux/arm64, go1.26.5, 424d125
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:13.176960912Z [INFO] 127.0.0.1:48632 - 35507 "HINFO IN 2963880507341607674.3919609304326091831. udp 57 false 512" NOERROR qr,rd,ra 57 0.001808858s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:40.694454627Z [INFO] 10.244.0.9:49749 - 23094 "A IN example.com.svc.cluster.local. udp 47 false 512" NXDOMAIN qr,aa,rd 140 0.000282212s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:40.694935051Z [INFO] 10.244.0.9:49749 - 50229 "AAAA IN example.com.svc.cluster.local. udp 47 false 512" NXDOMAIN qr,aa,rd 140 0.000069334s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:40.695125512Z [INFO] 10.244.0.9:41475 - 43960 "A IN example.com.cluster.local. udp 43 false 512" NXDOMAIN qr,aa,rd 136 0.000021292s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:40.695290097Z [INFO] 10.244.0.9:41475 - 41659 "AAAA IN example.com.cluster.local. udp 43 false 512" NXDOMAIN qr,aa,rd 136 0.000055792s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.810167369Z [INFO] 10.244.0.9:47418 - 12910 "A IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 90 0.00020842s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.810194745Z [INFO] 10.244.0.9:47418 - 10607 "AAAA IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 139 0.000270004s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.856978928Z [INFO] 10.244.0.9:38524 - 251 "AAAA IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 138 0.000095834s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.856993178Z [INFO] 10.244.0.9:38524 - 2042 "A IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 88 0.000129585s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.870634281Z [INFO] 10.244.0.9:56842 - 28693 "AAAA IN llm.rag.svc.cluster.local. udp 43 false 512" NOERROR qr,aa,rd 136 0.000069876s
+[pod/coredns-6fd657f4f7-j7ds8/coredns] 2026-10-03T07:57:52.870651657Z [INFO] 10.244.0.9:56842 - 20499 "A IN llm.rag.svc.cluster.local. udp 43 false 512" NOERROR qr,aa,rd 84 0.000079793s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.101096256Z maxprocs: Leaving GOMAXPROCS=4: CPU quota undefined
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.203627775Z .:53
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.203695234Z [INFO] plugin/reload: Running configuration SHA512 = 2dd49c56b94cd5672aafc99f92d4b5ff824b6ae87878b18330ea3f5199d47baffba03feab068065d91ea11f9ff9de9eb155741708e79bfb0228360463ef6dbde
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.203698193Z CoreDNS-1.14.6
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.203699109Z linux/arm64, go1.26.5, 424d125
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:13.204212741Z [INFO] 127.0.0.1:57342 - 33979 "HINFO IN 2096845492865952416.3916791164191206062. udp 57 false 512" NOERROR qr,rd,ra 57 0.000489465s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.626640617Z [INFO] 10.244.0.9:56202 - 33727 "A IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 90 0.000327296s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.626659242Z [INFO] 10.244.0.9:56202 - 21436 "AAAA IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 139 0.000045042s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.693585157Z [INFO] 10.244.0.9:53783 - 26036 "A IN example.com.rag.svc.cluster.local. udp 51 false 512" NXDOMAIN qr,aa,rd 144 0.000102293s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.694706256Z [INFO] 10.244.0.9:53783 - 51643 "AAAA IN example.com.rag.svc.cluster.local. udp 51 false 512" NXDOMAIN qr,aa,rd 144 0.000927012s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.698909980Z [INFO] 10.244.0.9:36128 - 41940 "AAAA IN example.com. udp 29 false 512" NOERROR qr,rd,ra 29 0.003355463s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:40.715135285Z [INFO] 10.244.0.9:36128 - 19668 "A IN example.com. udp 29 false 512" NOERROR qr,rd,ra 83 0.019360224s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:52.712139901Z [INFO] 10.244.0.9:54531 - 34951 "AAAA IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 138 0.000507132s
+[pod/coredns-6fd657f4f7-qbrxx/coredns] 2026-10-03T07:57:52.712168693Z [INFO] 10.244.0.9:54531 - 20096 "A IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 88 0.000606925s

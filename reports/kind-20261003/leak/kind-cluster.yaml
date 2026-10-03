@@ -1,0 +1,12 @@
+# 감사용 단일 노드 kind 클러스터. 호스트의 models/ 디렉터리를 노드의 /models로 붙인다.
+# hostPath는 audit.sh가 저장소 경로로 바꿔 넣는다.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  # 기본 CNI(kindnet)를 쓴다. kind v0.24.0부터 kube-network-policies로 NetworkPolicy를 적용한다.
+  disableDefaultCNI: false
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: <repo>/models
+        containerPath: /models

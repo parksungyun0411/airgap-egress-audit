@@ -1,0 +1,9 @@
+kind: kind v0.33.0 go1.27.0 darwin/arm64
+kubernetes: v1.37.0
+node image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+kindnetd: docker.io/kindest/kindnetd:v20260820-69b56db7
+coredns: registry.k8s.io/coredns/coredns:v1.14.6
+docker: 29.5.2 (arm64)
+colima: colima version 0.10.3
+capture: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+host: Darwin arm64

@@ -1,0 +1,62 @@
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.200335320Z maxprocs: Leaving GOMAXPROCS=4: CPU quota undefined
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.304775091Z .:53
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.304794050Z [INFO] plugin/reload: Running configuration SHA512 = 2dd49c56b94cd5672aafc99f92d4b5ff824b6ae87878b18330ea3f5199d47baffba03feab068065d91ea11f9ff9de9eb155741708e79bfb0228360463ef6dbde
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.304803093Z CoreDNS-1.14.6
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.304804718Z linux/arm64, go1.26.5, 424d125
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:19.306187434Z [INFO] 127.0.0.1:38296 - 22734 "HINFO IN 1068547159102761180.325166353369881524. udp 56 false 512" NOERROR qr,rd,ra 56 0.001212914s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.491255322Z [INFO] 10.244.0.10:37957 - 12894 "A IN telemetry.qdrant.io.svc.cluster.local. udp 55 false 512" NXDOMAIN qr,aa,rd 148 0.000123925s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.491335077Z [INFO] 10.244.0.10:37957 - 5213 "AAAA IN telemetry.qdrant.io.svc.cluster.local. udp 55 false 512" NXDOMAIN qr,aa,rd 148 0.000077006s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.491392039Z [INFO] 10.244.0.10:60555 - 48012 "AAAA IN telemetry.qdrant.io.cluster.local. udp 51 false 512" NXDOMAIN qr,aa,rd 144 0.000021084s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.491441125Z [INFO] 10.244.0.10:60555 - 18060 "A IN telemetry.qdrant.io.cluster.local. udp 51 false 512" NXDOMAIN qr,aa,rd 144 0.000026086s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.493610893Z [INFO] 10.244.0.10:34371 - 9399 "AAAA IN telemetry.qdrant.io. udp 37 false 512" NOERROR qr,rd,ra 37 0.001060403s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.545860919Z [INFO] 10.244.0.10:34371 - 29878 "A IN telemetry.qdrant.io. udp 37 false 512" NOERROR qr,rd,ra 107 0.05416536s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.848422643Z [INFO] 10.244.0.12:55423 - 2500 "AAAA IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.001044485s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.848438185Z [INFO] 10.244.0.12:55423 - 23493 "A IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000059796s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.850583160Z [INFO] 10.244.0.12:36179 - 22965 "AAAA IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 32 0.000910518s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:45.865641819Z [INFO] 10.244.0.12:36179 - 692 "A IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 152 0.015836543s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.634421119Z [INFO] 10.244.0.12:36107 - 41137 "AAAA IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000092673s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.634439454Z [INFO] 10.244.0.12:36107 - 7091 "A IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000029252s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.635349680Z [INFO] 10.244.0.12:53252 - 23821 "A IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000132009s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.635471855Z [INFO] 10.244.0.12:53252 - 58893 "AAAA IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000110091s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.635686786Z [INFO] 10.244.0.12:49281 - 53102 "A IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000063087s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.636386207Z [INFO] 10.244.0.12:49281 - 10593 "AAAA IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000131384s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.636423001Z [INFO] 10.244.0.12:36069 - 23730 "AAAA IN huggingface.co. udp 32 false 512" NOERROR qr,aa,rd,ra 32 0.000025168s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:24:46.636641557Z [INFO] 10.244.0.12:36069 - 50355 "A IN huggingface.co. udp 32 false 512" NOERROR qr,aa,rd,ra 152 0.000023293s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.467900304Z [INFO] 10.244.0.12:60610 - 51851 "AAAA IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000215027s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.467947625Z [INFO] 10.244.0.12:60610 - 9604 "A IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000381608s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.468173857Z [INFO] 10.244.0.12:56031 - 62136 "A IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000066149s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.468224510Z [INFO] 10.244.0.12:56031 - 31877 "AAAA IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000110388s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.470251518Z [INFO] 10.244.0.12:44657 - 63111 "AAAA IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 32 0.001678724s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:26:47.486450914Z [INFO] 10.244.0.12:44657 - 9092 "A IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 152 0.017778313s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:28:48.296117109Z [INFO] 10.244.0.12:52626 - 63490 "AAAA IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000053661s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:28:48.296124983Z [INFO] 10.244.0.12:52626 - 17692 "A IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000072285s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.016209460Z [INFO] 10.244.0.9:37343 - 59777 "A IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 88 0.000284408s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.016689444Z [INFO] 10.244.0.9:37343 - 19075 "AAAA IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 138 0.000386363s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.122841178Z [INFO] 10.244.0.9:51404 - 31448 "AAAA IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 138 0.000086123s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.122855553Z [INFO] 10.244.0.9:51404 - 34783 "A IN embed.rag.svc.cluster.local. udp 45 false 512" NOERROR qr,aa,rd 88 0.000109163s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.141417092Z [INFO] 10.244.0.9:49639 - 48048 "AAAA IN llm.rag.svc.cluster.local. udp 43 false 512" NOERROR qr,aa,rd 136 0.000064957s
+[pod/coredns-c7fd8f66f-cjbqc/coredns] 2026-10-03T07:30:54.141492339Z [INFO] 10.244.0.9:49639 - 40115 "A IN llm.rag.svc.cluster.local. udp 43 false 512" NOERROR qr,aa,rd 84 0.00010133s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.207170983Z maxprocs: Leaving GOMAXPROCS=4: CPU quota undefined
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.309020414Z .:53
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.310271997Z [INFO] plugin/reload: Running configuration SHA512 = 2dd49c56b94cd5672aafc99f92d4b5ff824b6ae87878b18330ea3f5199d47baffba03feab068065d91ea11f9ff9de9eb155741708e79bfb0228360463ef6dbde
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.310276623Z CoreDNS-1.14.6
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.310277998Z linux/arm64, go1.26.5, 424d125
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:19.310279290Z [INFO] 127.0.0.1:52184 - 34135 "HINFO IN 4050991978407804298.2991124067903062919. udp 57 false 512" NOERROR qr,rd,ra 57 0.000454072s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.489478788Z [INFO] 10.244.0.10:40421 - 17224 "AAAA IN telemetry.qdrant.io.rag.svc.cluster.local. udp 59 false 512" NXDOMAIN qr,aa,rd 152 0.000291102s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.489791475Z [INFO] 10.244.0.10:40421 - 57167 "A IN telemetry.qdrant.io.rag.svc.cluster.local. udp 59 false 512" NXDOMAIN qr,aa,rd 152 0.000083589s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.848733080Z [INFO] 10.244.0.12:37924 - 16251 "A IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000109966s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.849357579Z [INFO] 10.244.0.12:37924 - 4985 "AAAA IN huggingface.co.svc.cluster.local. udp 50 false 512" NXDOMAIN qr,aa,rd 143 0.000790635s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.849435959Z [INFO] 10.244.0.12:51834 - 64175 "AAAA IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000252142s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:45.849519090Z [INFO] 10.244.0.12:51834 - 52142 "A IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000288852s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:46.240339665Z [INFO] 10.244.0.9:41061 - 58399 "A IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 90 0.000128175s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:24:46.240353875Z [INFO] 10.244.0.9:41061 - 28445 "AAAA IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 139 0.000038086s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:26:47.467278218Z [INFO] 10.244.0.12:39293 - 42155 "AAAA IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000581347s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:26:47.467320582Z [INFO] 10.244.0.12:39293 - 65198 "A IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000691109s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.295819597Z [INFO] 10.244.0.12:55944 - 18966 "AAAA IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.000084867s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.295862676Z [INFO] 10.244.0.12:55944 - 31764 "A IN huggingface.co.rag.svc.cluster.local. udp 54 false 512" NXDOMAIN qr,aa,rd 147 0.00006491s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.296386541Z [INFO] 10.244.0.12:58257 - 37689 "A IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000047954s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.296390041Z [INFO] 10.244.0.12:58257 - 26681 "AAAA IN huggingface.co.cluster.local. udp 46 false 512" NXDOMAIN qr,aa,rd 139 0.000041996s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.297021105Z [INFO] 10.244.0.12:33007 - 59044 "AAAA IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 32 0.000578027s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:28:48.315351152Z [INFO] 10.244.0.12:33007 - 40871 "A IN huggingface.co. udp 32 false 512" NOERROR qr,rd,ra 152 0.018885743s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:30:54.071159809Z [INFO] 10.244.0.9:50649 - 7703 "AAAA IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 139 0.000171577s
+[pod/coredns-c7fd8f66f-zm596/coredns] 2026-10-03T07:30:54.072606597Z [INFO] 10.244.0.9:50649 - 58391 "A IN qdrant.rag.svc.cluster.local. udp 46 false 512" NOERROR qr,aa,rd 90 0.000242159s

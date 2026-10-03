@@ -1,0 +1,7 @@
+component,stage,protocol,destination,ip,port,attempts,left_node,first_seen_s
+embed,install,dns,huggingface.co,,53,6,0,0.9
+embed,install,tcp,huggingface.co,3.168.178.58,443,1,1,1.0
+embed,startup,dns,huggingface.co,,53,18,0,1.7
+embed,startup,tcp,huggingface.co,3.168.178.31,443,108,0,1.7
+qdrant,install,dns,telemetry.qdrant.io,,53,8,0,0.6
+qdrant,install,tcp,telemetry.qdrant.io,23.23.139.54,443,1,1,0.6

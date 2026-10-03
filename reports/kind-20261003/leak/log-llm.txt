@@ -1,0 +1,17 @@
+2026-10-03T07:57:40.085220255Z warn: LLAMA_ARG_HOST environment variable is set, but will be overwritten by command line argument --host
+2026-10-03T07:57:40.085463759Z 0.00.003.743 I srv  llama_server: initializing ...
+2026-10-03T07:57:40.092703441Z 0.00.010.727 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+2026-10-03T07:57:40.093052154Z 0.00.011.292 W srv  llama_server: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+2026-10-03T07:57:40.097806178Z 0.00.016.034 I srv    load_model: loading model '/models/kanana-1.5-2.1b-instruct-q4_k_m.gguf'
+2026-10-03T07:57:43.968034529Z 0.03.886.132 I cmn          init: llama threadpool init, n_threads = 2
+2026-10-03T07:57:44.187067026Z 0.04.105.402 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 2048, kv_unified = 'true'
+2026-10-03T07:57:44.196346778Z 0.04.114.741 I srv  llama_server: model loaded
+2026-10-03T07:57:44.196364153Z 0.04.114.756 I srv  llama_server: listening on http://0.0.0.0:8080
+2026-10-03T07:57:44.196371195Z 0.04.114.759 W srv  llama_server: notice: server default port will be changed to :9931 in a future release (ref: https://github.com/ggml-org/llama.cpp/pull/26508)
+2026-10-03T07:57:52.881027341Z 0.12.799.339 I slot get_availabl: id  3 | task -1 | selected slot by LRU, t_last = -1
+2026-10-03T07:57:52.881256552Z 0.12.799.605 I slot launch_slot_: id  3 | task 0 | processing task, is_child = 0
+2026-10-03T07:57:55.893511102Z 0.15.811.863 I slot print_timing: id  3 | task 0 | prompt eval time =    2334.74 ms /   155 tokens (   15.06 ms per token,    66.39 tokens per second)
+2026-10-03T07:57:55.893530936Z 0.15.811.868 I slot print_timing: id  3 | task 0 |        eval time =     677.44 ms /    25 tokens (   28.23 ms per token,    35.43 tokens per second)
+2026-10-03T07:57:55.893532311Z 0.15.811.869 I slot print_timing: id  3 | task 0 |       total time =    3012.17 ms /   180 tokens
+2026-10-03T07:57:55.893533186Z 0.15.811.872 I slot print_timing: id  3 | task 0 |    graphs reused =         24
+2026-10-03T07:57:55.893783981Z 0.15.812.156 I slot      release: id  3 | task 0 | stop processing: n_tokens = 179, truncated = 0

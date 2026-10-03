@@ -1,0 +1,2 @@
+delay=0s: CONNECTED (정책 미적용)
+delay=15s: BLOCKED TimeoutError

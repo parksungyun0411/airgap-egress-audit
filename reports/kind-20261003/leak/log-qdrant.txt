@@ -1,0 +1,28 @@
+2026-10-03T07:57:39.851560644Z            _                 _    
+2026-10-03T07:57:39.851603187Z   __ _  __| |_ __ __ _ _ __ | |_  
+2026-10-03T07:57:39.851616270Z  / _` |/ _` | '__/ _` | '_ \| __| 
+2026-10-03T07:57:39.851627520Z | (_| | (_| | | | (_| | | | | |_  
+2026-10-03T07:57:39.851644312Z  \__, |\__,_|_|  \__,_|_| |_|\__| 
+2026-10-03T07:57:39.851668437Z     |_|                           
+2026-10-03T07:57:39.851680604Z 
+2026-10-03T07:57:39.851701605Z Version: 1.19.1, build: 6ab21cac
+2026-10-03T07:57:39.851720688Z Access web UI at http://localhost:6333/dashboard
+2026-10-03T07:57:39.851744980Z Agentic Skills: https://skills.qdrant.tech/
+2026-10-03T07:57:39.851753230Z 
+2026-10-03T07:57:39.854209097Z 2026-10-03T07:57:39.853998Z  WARN qdrant: There is a potential issue with the filesystem for storage path ./storage. Details: Container filesystem detected - storage might be lost with container re-creation
+2026-10-03T07:57:39.854228722Z 2026-10-03T07:57:39.854140Z  INFO storage::content_manager::consensus::persistent: Initializing new raft state at ./storage/raft_state.json
+2026-10-03T07:57:39.857916565Z 2026-10-03T07:57:39.857836Z  INFO qdrant: Distributed mode disabled
+2026-10-03T07:57:39.857927106Z 2026-10-03T07:57:39.857868Z  INFO qdrant: Telemetry reporting disabled
+2026-10-03T07:57:39.863984731Z 2026-10-03T07:57:39.863767Z  INFO qdrant::actix: REST transport settings: keep_alive=5s, client_request_timeout=5s, client_disconnect_timeout=5s
+2026-10-03T07:57:39.863994106Z 2026-10-03T07:57:39.863779Z  INFO qdrant::actix: TLS disabled for REST API
+2026-10-03T07:57:39.863994939Z 2026-10-03T07:57:39.863842Z  INFO qdrant::actix: Qdrant HTTP listening on 6333
+2026-10-03T07:57:39.863995648Z 2026-10-03T07:57:39.863848Z  INFO actix_server::builder: starting 1 workers
+2026-10-03T07:57:39.863996481Z 2026-10-03T07:57:39.863872Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
+2026-10-03T07:57:39.863997648Z 2026-10-03T07:57:39.863873Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6333", workers: 1, listening on: 0.0.0.0:6333
+2026-10-03T07:57:39.868287831Z 2026-10-03T07:57:39.867989Z  INFO qdrant::tonic: Qdrant gRPC listening on 6334
+2026-10-03T07:57:39.868296206Z 2026-10-03T07:57:39.868032Z  INFO qdrant::tonic: TLS disabled for gRPC API
+2026-10-03T07:57:52.811053298Z 2026-10-03T07:57:52.810939Z  INFO actix_web::middleware::logger: 10.244.0.9 "GET /collections/docs/exists HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.000541
+2026-10-03T07:57:52.813893379Z 2026-10-03T07:57:52.813590Z  INFO storage::content_manager::toc::collection_meta_ops: Creating collection docs
+2026-10-03T07:57:52.836494855Z 2026-10-03T07:57:52.836407Z  INFO actix_web::middleware::logger: 10.244.0.9 "PUT /collections/docs HTTP/1.1" 200 71 "-" "python-client/1.19.1 python/3.12.15" 0.023274
+2026-10-03T07:57:52.841478215Z 2026-10-03T07:57:52.841401Z  INFO actix_web::middleware::logger: 10.244.0.9 "PUT /collections/docs/points?wait=true HTTP/1.1" 200 91 "-" "python-client/1.19.1 python/3.12.15" 0.002458
+2026-10-03T07:57:52.866951523Z 2026-10-03T07:57:52.866870Z  INFO actix_web::middleware::logger: 10.244.0.9 "POST /collections/docs/points/query HTTP/1.1" 200 563 "-" "python-client/1.19.1 python/3.12.15" 0.001316

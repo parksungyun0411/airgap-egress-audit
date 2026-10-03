@@ -1,0 +1,4 @@
+ghcr.io/ggml-org/llama.cpp:server-b11347 ghcr.io/ggml-org/llama.cpp@sha256:970168341efef973da5666ea5c362fa428ee66ba0dfa621b0f69bf3feb3320f7
+ghcr.io/huggingface/text-embeddings-inference:cpu-arm64-1.9.4 ghcr.io/huggingface/text-embeddings-inference@sha256:798cd7615e060a72ccbdf19aa0ada52289c6a0147490195bafaece6ce04d70f1
+qdrant/qdrant:v1.19.1 qdrant/qdrant@sha256:12364fe851b9f17356fc88189fc06d1b521262e04659ec7345975b00c9246a10
+airgap-rag-app:0.1.0 airgap-rag-app@sha256:e99c3e1c369f25f2d800b5af4de284c0334b9a5d4774954f6902b9ece608d5e7
