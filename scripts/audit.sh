@@ -179,6 +179,10 @@ for c in llm embed qdrant rag; do kubectl -n "$NS" logs "deploy/$c" --timestamps
   echo "host: $(uname -sm)"
 } > "$OUT/versions.txt"
 docker exec "$NODE" crictl images --digests > "$OUT/images.txt"
+# 노드의 digest는 docker save로 만든 단일 플랫폼 사본 기준이라, 레지스트리 digest를 따로 남긴다.
+for img in "${IMAGES[@]}"; do
+  echo "$img $(docker image inspect --format '{{index .RepoDigests 0}}' "$img" 2>/dev/null || echo '-')"
+done > "$OUT/host-images.txt"
 
 # 11. 분석과 게이트
 cd "$ROOT"

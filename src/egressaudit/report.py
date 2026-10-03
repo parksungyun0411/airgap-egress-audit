@@ -30,6 +30,7 @@ RAW_FILES = [
     "meta.json",
     "versions.txt",
     "images.txt",
+    "host-images.txt",
     "policy-check.txt",
     "values.yaml",
     "first-request.json",
@@ -118,7 +119,8 @@ def run_section(label: str, run_dir: Path, out: Path) -> list[str]:
                     "목적지",
                     "IP",
                     "포트",
-                    "시도 수",
+                    "시도",
+                    "노드 밖으로 나감",
                     "처음 본 시각(초)",
                 ],
                 [
@@ -149,9 +151,51 @@ def run_section(label: str, run_dir: Path, out: Path) -> list[str]:
     return lines
 
 
+def environment_section(runs: list[tuple[str, Path]]) -> list[str]:
+    """첫 실행 폴더의 버전·이미지 digest와 재현 명령을 적는다."""
+    first = runs[0][1]
+    meta = json.loads((first / "meta.json").read_text())
+    labels = " ".join(label for label, _ in runs)
+    lines = [
+        "## 실행 환경과 명령",
+        "",
+        "```bash",
+        (
+            f"RUN_ID={first.parent.name} IDLE_SECONDS={meta.get('idle_seconds', '')} "
+            f"scripts/run_all.sh {labels}"
+        ),
+        "```",
+        "",
+    ]
+    if (first / "versions.txt").exists():
+        lines += [
+            "```text",
+            (first / "versions.txt").read_text(encoding="utf-8").strip(),
+            "```",
+            "",
+        ]
+    if (first / "host-images.txt").exists():
+        rows = [
+            line.split(maxsplit=1) for line in (first / "host-images.txt").read_text().splitlines()
+        ]
+        lines += [
+            "감사 대상 이미지와 레지스트리 digest(호스트 docker 기준):",
+            "",
+            markdown_table(["이미지", "digest"], rows),
+            "",
+        ]
+    lines += [
+        "`노드 밖으로 나감`은 같은 패킷의 NAT 사본이 노드 eth0으로 나간 수다. 0이면 정책이 버렸다.",
+        "DNS 시도 수는 검색 도메인을 붙인 질의(A·AAAA)를 모두 센 값이다.",
+        "",
+    ]
+    return lines
+
+
 def build(runs: list[tuple[str, Path]], out: Path, title: str) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     lines = [f"# {title}", ""]
+    lines += environment_section(runs)
     for label, run_dir in runs:
         lines += run_section(label, run_dir, out)
     report = out / "REPORT.md"
