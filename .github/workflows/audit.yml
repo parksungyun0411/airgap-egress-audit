@@ -1,0 +1,58 @@
+name: audit
+
+# GitHub 호스트 러너(ubuntu, amd64)의 kind에서 외부 호출 감사를 돈다.
+# 모델·이미지 내려받기와 세 번의 감사가 들어가 시간이 길어서 수동 실행만 받는다.
+on:
+  workflow_dispatch:
+    inputs:
+      idle_seconds:
+        description: 유휴 관찰 시간(초)
+        default: "300"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  kind-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: azure/setup-helm@v5
+      - name: kind 설치
+        run: |
+          curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
+          sudo install kind /usr/local/bin/kind
+      - run: uv sync --locked
+      - name: 반입 준비(모델·이미지)
+        run: |
+          scripts/fetch_models.sh
+          docker build -q -t airgap-rag-app:0.1.0 app
+      - name: 감사 before · after · leak
+        env:
+          IDLE_SECONDS: ${{ inputs.idle_seconds }}
+        run: |
+          run_id="kind-gha-$(date -u +%Y%m%dT%H%M%SZ)"
+          echo "RUN_ID=$run_id" >> "$GITHUB_ENV"
+          for p in before after leak; do
+            scripts/audit.sh "$p" "results/$run_id/$p"
+          done
+          uv run egress-audit report --out "reports/$run_id" \
+            --run "before=results/$run_id/before" --run "after=results/$run_id/after" \
+            --run "leak=results/$run_id/leak"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: egress-audit
+          path: |
+            results/
+            reports/
+      - name: 게이트 — after는 통과, leak은 실패해야 한다
+        run: |
+          uv run egress-audit gate --findings "results/$RUN_ID/after/findings.csv"
+          if uv run egress-audit gate --findings "results/$RUN_ID/leak/findings.csv"; then
+            echo "::error::일부러 넣은 누출을 게이트가 잡지 못했다"
+            exit 1
+          fi

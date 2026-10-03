@@ -1,0 +1,79 @@
+name: ci
+
+# push마다 클러스터 없이 확인할 수 있는 것과, 커밋된 감사 결과에 대한 게이트를 돈다.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      # 합성 픽스처에 누출을 일부러 넣어 게이트가 실패하는지까지 확인한다.
+      - run: uv run pytest -q
+
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: uv sync --locked
+      - name: 최신 kind 감사(after)에 허용 목록 밖 외부 호출이 없는지 확인
+        run: |
+          latest="$(find reports -maxdepth 2 -path 'reports/kind-*/after' -type d | sort | tail -1)"
+          if [ -z "$latest" ]; then
+            echo "::error::reports/kind-*/after 가 없다"
+            exit 1
+          fi
+          echo "== $latest"
+          uv run egress-audit gate --findings "$latest/findings.csv"
+
+  chart:
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFORM_VERSION: v0.8.0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5
+      - name: kubeconform 설치
+        run: |
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kubeconform
+      - name: helm lint · template | kubeconform
+        run: |
+          base=charts/rag-stack/values.yaml
+          for overlay in "" charts/rag-stack/values-after.yaml charts/rag-stack/values-leak.yaml charts/rag-stack/values-eks.yaml; do
+            args=(-f "$base")
+            if [ -n "$overlay" ]; then args+=(-f "$overlay"); fi
+            echo "== ${overlay:-before}"
+            helm lint charts/rag-stack --strict "${args[@]}"
+            helm template rag charts/rag-stack "${args[@]}" | kubeconform -strict -summary -kubernetes-version 1.35.0
+          done
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: app/Dockerfile
+      - uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: images/llm.Dockerfile
+      - uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: images/embed.Dockerfile
+      - name: shellcheck
+        run: shellcheck scripts/*.sh infra/*.sh infra/iam/*.sh
+      - name: actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
