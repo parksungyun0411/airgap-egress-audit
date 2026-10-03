@@ -50,8 +50,12 @@ trap cleanup EXIT
 # 1. 새 클러스터
 log "클러스터 생성"
 kind delete cluster --name "$CLUSTER" >/dev/null 2>&1 || true
-sed "s#__MODELS_DIR__#$ROOT/models#" "$ROOT/kind/cluster.yaml" > "$OUT/kind-cluster.yaml"
-kind create cluster --name "$CLUSTER" --config "$OUT/kind-cluster.yaml" --wait 120s >/dev/null
+KIND_CONFIG="$(mktemp)"
+sed "s#__MODELS_DIR__#$ROOT/models#" "$ROOT/kind/cluster.yaml" > "$KIND_CONFIG"
+# 기록용 사본에는 호스트의 절대 경로 대신 <repo>를 남긴다.
+sed "s#__MODELS_DIR__#<repo>/models#" "$ROOT/kind/cluster.yaml" > "$OUT/kind-cluster.yaml"
+kind create cluster --name "$CLUSTER" --config "$KIND_CONFIG" --wait 120s >/dev/null
+rm -f "$KIND_CONFIG"
 
 # 2. kindnet 정책 엔진은 nfqueue를 쓴다. 커널 모듈이 없으면 정책이 조용히 적용되지 않는다.
 if ! docker exec "$NODE" test -e /proc/net/netfilter/nfnetlink_queue; then
