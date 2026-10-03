@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>airgap-egress-audit · 구성</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #f3f4f6; }
+  body {
+    font-family: "Apple SD Gothic Neo", "Pretendard", -apple-system, system-ui, "Noto Sans KR", sans-serif;
+    -webkit-font-smoothing: antialiased; padding: 28px;
+  }
+  .sheet { width: 960px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px 30px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+  .head .t { font-size: 15px; font-weight: 800; color: #111827; }
+  .head .t span { color: #9ca3af; font-weight: 700; }
+  .head .tag { font-size: 11.5px; font-weight: 700; color: #374151; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 3px 10px; }
+
+  .row { display: flex; gap: 14px; align-items: stretch; }
+  .side { flex: 0 0 92px; display: flex; flex-direction: column; justify-content: center; }
+  .side .en { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: #6b7280; }
+  .side .ko { font-size: 13px; font-weight: 700; color: #374151; margin-top: 2px; }
+  .lane { flex: 1; display: flex; gap: 10px; align-items: center; border: 1.5px solid #e5e7eb; border-radius: 12px; background: #fafafa; padding: 12px 14px; }
+  .box { flex: 1 1 0; min-width: 0; background: #fff; border: 1.5px solid #d1d5db; border-radius: 9px; padding: 9px 12px; color: #1f2937; }
+  .box b { display: block; font-size: 14px; font-weight: 800; }
+  .box i { display: block; font-style: normal; font-size: 11.5px; color: #6b7280; margin-top: 3px; }
+  .wide { flex: 2 1 0; }
+  .arr { color: #9ca3af; font-size: 17px; flex: 0 0 auto; }
+  .down { color: #9ca3af; font-size: 12px; font-weight: 700; padding: 5px 0 5px 106px; }
+
+  .ns { flex: 1; border: 2px dashed #f87171; border-radius: 12px; background: #fff7f7; padding: 12px 14px; }
+  .ns .cap { font-size: 11.5px; font-weight: 700; color: #b91c1c; margin-bottom: 9px; }
+  .ns .inner { display: flex; gap: 10px; }
+  .sys { flex: 0 0 170px; border: 1.5px solid #c7d2fe; border-radius: 12px; background: #eef2ff; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
+  .sys b { font-size: 14px; font-weight: 800; color: #3730a3; }
+  .sys i { font-style: normal; font-size: 11.5px; color: #4f46e5; margin-top: 3px; }
+  .cluster { flex: 1; display: flex; gap: 10px; border: 1.5px solid #93c5fd; border-radius: 12px; background: #eff6ff; padding: 12px; }
+
+  .cap-box { background: #ecfdf5; border-color: #a7f3d0; }
+  .cap-box b { color: #065f46; }
+  .gate { background: #fef2f2; border-color: #fecaca; }
+  .gate b { color: #991b1b; }
+  .stages { display: flex; gap: 6px; flex: 1; }
+  .st { flex: 1; text-align: center; font-size: 12.5px; font-weight: 800; color: #1f2937; background: #fff; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 8px 4px; }
+  .st i { display: block; font-style: normal; font-weight: 500; font-size: 11px; color: #6b7280; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="sheet" id="cap">
+    <div class="head">
+      <div class="t">airgap-egress-audit <span>· 반입 · 감사 · 게이트</span></div>
+      <div class="tag">실행 환경: kind on macOS (colima) · EKS 변형은 미실행</div>
+    </div>
+
+    <div class="row">
+      <div class="side"><div class="en">BRING-IN</div><div class="ko">반입 전 준비</div></div>
+      <div class="lane">
+        <div class="box"><b>모델 파일</b><i>kanana-1.5-2.1b Q4_K_M (sha256 고정) · e5-small HF 캐시(TEI로 한 번 데움)</i></div>
+        <div class="box"><b>이미지</b><i>llama.cpp b11347 · TEI 1.9.4 · Qdrant 1.19.1 · RAG 앱</i></div>
+        <div class="arr">→</div>
+        <div class="box"><b>kind load image-archive</b><i>hostPath /models · imagePullPolicy: Never</i></div>
+      </div>
+    </div>
+    <div class="down">▼ helm install</div>
+
+    <div class="row">
+      <div class="side"><div class="en">CLUSTER</div><div class="ko">kind 1노드</div></div>
+      <div class="cluster">
+        <div class="ns">
+          <div class="cap">네임스페이스 rag · NetworkPolicy 기본 거부 egress (허용: CoreDNS 53, 같은 네임스페이스)</div>
+          <div class="inner">
+            <div class="box"><b>llm</b><i>llama-server</i></div>
+            <div class="box"><b>embed</b><i>TEI</i></div>
+            <div class="box"><b>qdrant</b><i>벡터 DB</i></div>
+            <div class="box"><b>rag</b><i>FastAPI</i></div>
+          </div>
+        </div>
+        <div class="sys"><b>CoreDNS</b><i>log 플러그인으로 질의 기록 · 외부 이름도 풀어 줌</i></div>
+      </div>
+    </div>
+    <div class="down">▼ 노드 네트워크 네임스페이스에서 관찰 (정책이 버리기 전 단계)</div>
+
+    <div class="row">
+      <div class="side"><div class="en">CAPTURE</div><div class="ko">단계별 기록</div></div>
+      <div class="lane">
+        <div class="box cap-box"><b>tcpdump -i any</b><i>클러스터 밖 컨테이너가 노드 netns에 붙어 SYN·UDP 기록</i></div>
+        <div class="stages">
+          <div class="st">install<i>helm → Running</i></div>
+          <div class="st">startup<i>→ Ready</i></div>
+          <div class="st">first request<i>ingest · ask</i></div>
+          <div class="st">idle<i>N초</i></div>
+        </div>
+      </div>
+    </div>
+    <div class="down">▼</div>
+
+    <div class="row">
+      <div class="side"><div class="en">GATE</div><div class="ko">분석 · 회귀</div></div>
+      <div class="lane">
+        <div class="box"><b>egress-audit analyze</b><i>파드 IP·DNS 응답으로 귀속 → findings.csv (구성 요소 × 단계 × 목적지)</i></div>
+        <div class="arr">→</div>
+        <div class="box gate"><b>egress-audit gate</b><i>policy/allowlist.toml 밖이면 실패 · 비어 있으면 0건 요구</i></div>
+        <div class="arr">→</div>
+        <div class="box"><b>reports/&lt;run-id&gt;/</b><i>before · after · leak 표와 원자료</i></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
