@@ -9,6 +9,10 @@ dependencies = ["matplotlib>=3.9"]
 [project.scripts]
 egress-audit = "egressaudit.cli:main"
 
+# `uv sync`는 dev 그룹을 기본으로 설치한다. `uv run --extra dev`로도 같은 도구를 쓸 수 있게 extra도 둔다.
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
 

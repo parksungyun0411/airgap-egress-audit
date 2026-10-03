@@ -26,6 +26,21 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv sync --locked
+      - name: 커밋된 원자료로 분석을 다시 돌려 findings.csv와 같은지 확인
+        run: |
+          status=0
+          for run in $(find reports -mindepth 2 -maxdepth 2 -type d -path 'reports/kind-*/*' | sort); do
+            tmp="$(mktemp -d)"
+            cp "$run"/capture.txt "$run"/pods.jsonl "$run"/stages.json "$run"/meta.json "$tmp"/
+            uv run egress-audit analyze --run-dir "$tmp" > /dev/null
+            if diff -u "$run/findings.csv" "$tmp/findings.csv"; then
+              echo "same: $run"
+            else
+              echo "::error::$run/findings.csv가 분석기 결과와 다르다"
+              status=1
+            fi
+          done
+          exit "$status"
       - name: 최신 kind 감사(after)에 허용 목록 밖 외부 호출이 없는지 확인
         run: |
           latest="$(find reports -maxdepth 2 -path 'reports/kind-*/after' -type d | sort | tail -1)"
@@ -35,6 +50,17 @@ jobs:
           fi
           echo "== $latest"
           uv run egress-audit gate --findings "$latest/findings.csv"
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: 커밋된 파일에 로컬 절대 경로(/Users/)가 없는지 확인
+        run: |
+          if git grep -n "/Users/" -- . ':!.github/workflows/ci.yml'; then
+            echo "::error::로컬 절대 경로가 커밋되어 있다"
+            exit 1
+          fi
 
   chart:
     runs-on: ubuntu-latest
