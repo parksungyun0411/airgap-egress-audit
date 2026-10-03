@@ -27,8 +27,13 @@ host: Darwin arm64
 | qdrant/qdrant:v1.19.1 | qdrant/qdrant@sha256:12364fe851b9f17356fc88189fc06d1b521262e04659ec7345975b00c9246a10 |
 | airgap-rag-app:0.1.0 | airgap-rag-app@sha256:e99c3e1c369f25f2d800b5af4de284c0334b9a5d4774954f6902b9ece608d5e7 |
 
-`노드 밖으로 나감`은 같은 패킷의 NAT 사본이 노드 eth0으로 나간 수다. 0이면 정책이 버렸다.
-DNS 시도 수는 검색 도메인을 붙인 질의(A·AAAA)를 모두 센 값이다.
+읽는 법:
+
+- `시도`(TCP·UDP): 파드 쪽 veth에서 잡힌 SYN·UDP 패킷 수. 재전송도 센다.
+- `시도`(DNS): 파드가 CoreDNS에 보낸 질의 중 같은 외부 이름의 모든 형태(이름 그대로, `<ns>.svc.cluster.local`·`svc.cluster.local`·`cluster.local`을 붙인 것, 노드 검색 도메인을 붙인 것)를 A·AAAA 구분 없이 센 값.
+- `클러스터 밖으로 나감`(TCP·UDP): 같은 패킷의 NAT 사본이 노드 eth0으로 나간 수. 0이면 정책이 버렸다.
+- `클러스터 밖으로 나감`(DNS): CoreDNS가 그 이름을 노드 resolv.conf의 상위 리졸버로 넘긴 질의 수. NetworkPolicy는 CoreDNS까지만 허용하므로 이 경로는 정책으로 막히지 않는다. CoreDNS 캐시(30초)에 있던 이름은 넘기지 않아 0일 수 있다.
+- `IP`: 그 행에서 연결을 시도한 모든 목적지 IP.
 
 ## before
 
@@ -48,22 +53,22 @@ DNS 시도 수는 검색 도메인을 붙인 질의(A·AAAA)를 모두 센 값�
 
 시도 목록:
 
-| 구성 요소 | 단계 | 프로토콜 | 목적지 | IP | 포트 | 시도 | 노드 밖으로 나감 | 처음 본 시각(초) |
+| 구성 요소 | 단계 | 프로토콜 | 목적지 | IP | 포트 | 시도 | 클러스터 밖으로 나감 | 처음 본 시각(초) |
 |---|---|---|---|---|---|---|---|---|
-| embed | install | dns | huggingface.co |  | 53 | 6 | 0 | 0.9 |
+| embed | install | dns | huggingface.co |  | 53 | 8 | 2 | 0.9 |
 | embed | install | tcp | huggingface.co | 3.168.178.58 | 443 | 1 | 1 | 1.0 |
-| embed | startup | dns | huggingface.co |  | 53 | 18 | 0 | 1.7 |
-| embed | startup | tcp | huggingface.co | 3.168.178.31 | 443 | 108 | 0 | 1.7 |
-| qdrant | install | dns | telemetry.qdrant.io |  | 53 | 8 | 0 | 0.6 |
+| embed | startup | dns | huggingface.co |  | 53 | 24 | 4 | 1.7 |
+| embed | startup | tcp | huggingface.co | 3.168.178.31 3.168.178.58 3.168.178.101 3.168.178.122 | 443 | 108 | 0 | 1.7 |
+| qdrant | install | dns | telemetry.qdrant.io |  | 53 | 8 | 2 | 0.6 |
 | qdrant | install | tcp | telemetry.qdrant.io | 23.23.139.54 | 443 | 1 | 1 | 0.6 |
 
 게이트:
 
 ```text
 FAIL: 허용 목록 밖의 외부 호출 시도 6건
-  embed [install] dns huggingface.co:53 x6
+  embed [install] dns huggingface.co:53 x8
   embed [install] tcp huggingface.co:443 x1
-  embed [startup] dns huggingface.co:53 x18
+  embed [startup] dns huggingface.co:53 x24
   embed [startup] tcp huggingface.co:443 x108
   qdrant [install] dns telemetry.qdrant.io:53 x8
   qdrant [install] tcp telemetry.qdrant.io:443 x1
@@ -111,17 +116,17 @@ PASS: 허용 목록 밖의 외부 호출 시도 0건
 
 시도 목록:
 
-| 구성 요소 | 단계 | 프로토콜 | 목적지 | IP | 포트 | 시도 | 노드 밖으로 나감 | 처음 본 시각(초) |
+| 구성 요소 | 단계 | 프로토콜 | 목적지 | IP | 포트 | 시도 | 클러스터 밖으로 나감 | 처음 본 시각(초) |
 |---|---|---|---|---|---|---|---|---|
-| rag | install | dns | example.com |  | 53 | 6 | 0 | 1.5 |
+| rag | install | dns | example.com |  | 53 | 8 | 2 | 1.5 |
 | rag | install | tcp | example.com | 104.20.23.154 | 443 | 1 | 0 | 1.5 |
-| rag | startup | tcp | example.com | 172.66.147.243 | 443 | 9 | 0 | 1.7 |
+| rag | startup | tcp | example.com | 104.20.23.154 172.66.147.243 | 443 | 9 | 0 | 1.7 |
 
 게이트:
 
 ```text
 FAIL: 허용 목록 밖의 외부 호출 시도 3건
-  rag [install] dns example.com:53 x6
+  rag [install] dns example.com:53 x8
   rag [install] tcp example.com:443 x1
   rag [startup] tcp example.com:443 x9
 ```

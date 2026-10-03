@@ -1,1 +1,1 @@
-component,stage,protocol,destination,ip,port,attempts,left_node,first_seen_s
+component,stage,protocol,destination,ip,port,attempts,left_cluster,first_seen_s

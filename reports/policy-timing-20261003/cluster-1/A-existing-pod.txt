@@ -1,0 +1,4 @@
+existing pod IP: 10.244.0.5
+t= 0.00s CONNECTED
+policy applied at 1791024410.540
+since_policy=0.06s BLOCKED TimeoutError

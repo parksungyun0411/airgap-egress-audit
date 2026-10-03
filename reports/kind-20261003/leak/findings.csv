@@ -1,4 +1,4 @@
-component,stage,protocol,destination,ip,port,attempts,left_node,first_seen_s
-rag,install,dns,example.com,,53,6,0,1.5
+component,stage,protocol,destination,ip,port,attempts,left_cluster,first_seen_s
+rag,install,dns,example.com,,53,8,2,1.5
 rag,install,tcp,example.com,104.20.23.154,443,1,0,1.5
-rag,startup,tcp,example.com,172.66.147.243,443,9,0,1.7
+rag,startup,tcp,example.com,104.20.23.154 172.66.147.243,443,9,0,1.7

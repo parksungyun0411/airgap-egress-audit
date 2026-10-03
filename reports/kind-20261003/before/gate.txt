@@ -1,7 +1,7 @@
 FAIL: 허용 목록 밖의 외부 호출 시도 6건
-  embed [install] dns huggingface.co:53 x6
+  embed [install] dns huggingface.co:53 x8
   embed [install] tcp huggingface.co:443 x1
-  embed [startup] dns huggingface.co:53 x18
+  embed [startup] dns huggingface.co:53 x24
   embed [startup] tcp huggingface.co:443 x108
   qdrant [install] dns telemetry.qdrant.io:53 x8
   qdrant [install] tcp telemetry.qdrant.io:443 x1

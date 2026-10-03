@@ -1,4 +1,4 @@
 FAIL: 허용 목록 밖의 외부 호출 시도 3건
-  rag [install] dns example.com:53 x6
+  rag [install] dns example.com:53 x8
   rag [install] tcp example.com:443 x1
   rag [startup] tcp example.com:443 x9
