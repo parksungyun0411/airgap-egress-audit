@@ -121,7 +121,7 @@ def run_section(label: str, run_dir: Path, out: Path) -> list[str]:
                     "IP",
                     "포트",
                     "시도",
-                    "노드 밖으로 나감",
+                    "클러스터 밖으로 나감",
                     "처음 본 시각(초)",
                 ],
                 [
@@ -133,7 +133,7 @@ def run_section(label: str, run_dir: Path, out: Path) -> list[str]:
                         r["ip"],
                         r["port"],
                         r["attempts"],
-                        r["left_node"],
+                        r["left_cluster"],
                         r["first_seen_s"],
                     ]
                     for r in rows
@@ -186,8 +186,24 @@ def environment_section(runs: list[tuple[str, Path]]) -> list[str]:
             "",
         ]
     lines += [
-        "`노드 밖으로 나감`은 같은 패킷의 NAT 사본이 노드 eth0으로 나간 수다. 0이면 정책이 버렸다.",
-        "DNS 시도 수는 검색 도메인을 붙인 질의(A·AAAA)를 모두 센 값이다.",
+        "읽는 법:",
+        "",
+        "- `시도`(TCP·UDP): 파드 쪽 veth에서 잡힌 SYN·UDP 패킷 수. 재전송도 센다.",
+        (
+            "- `시도`(DNS): 파드가 CoreDNS에 보낸 질의 중 같은 외부 이름의 모든 형태(이름 그대로, "
+            "`<ns>.svc.cluster.local`·`svc.cluster.local`·`cluster.local`을 붙인 것, "
+            "노드 검색 도메인을 붙인 것)를 A·AAAA 구분 없이 센 값."
+        ),
+        (
+            "- `클러스터 밖으로 나감`(TCP·UDP): 같은 패킷의 NAT 사본이 노드 eth0으로 나간 수. "
+            "0이면 정책이 버렸다."
+        ),
+        (
+            "- `클러스터 밖으로 나감`(DNS): CoreDNS가 그 이름을 노드 resolv.conf의 상위 리졸버로 "
+            "넘긴 질의 수. NetworkPolicy는 CoreDNS까지만 허용하므로 이 경로는 정책으로 막히지 않는다. "
+            "CoreDNS 캐시(30초)에 있던 이름은 넘기지 않아 0일 수 있다."
+        ),
+        "- `IP`: 그 행에서 연결을 시도한 모든 목적지 IP.",
         "",
     ]
     return lines

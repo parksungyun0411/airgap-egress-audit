@@ -4,7 +4,15 @@ from pathlib import Path
 import pytest
 
 from egressaudit import cli, gate
-from egressaudit.analyze import Context, analyze_dir, external_name, findings, matrix, stage_of
+from egressaudit.analyze import (
+    Context,
+    analyze_dir,
+    canonical_name,
+    external_names,
+    findings,
+    matrix,
+    stage_of,
+)
 from egressaudit.capture import parse, parse_line
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -76,28 +84,55 @@ def test_parse_syn_dns_query_answer_udp():
     assert parse_line("listening on any, link-type LINUX_SLL2") is None
 
 
+# before 실행의 원자료에 실제로 나온 질의 이름들
+QNAMES = [
+    "huggingface.co.rag.svc.cluster.local",
+    "huggingface.co.svc.cluster.local",
+    "huggingface.co.cluster.local",
+    "huggingface.co",
+    "telemetry.qdrant.io.rag.svc.cluster.local",
+    "telemetry.qdrant.io.svc.cluster.local",
+    "telemetry.qdrant.io.cluster.local",
+    "telemetry.qdrant.io",
+    "qdrant.rag.svc.cluster.local",
+    "kube-dns.kube-system.svc.cluster.local",
+    "20.0.244.10.in-addr.arpa",
+]
+
+
+def test_external_names_from_capture():
+    assert external_names(QNAMES, "rag") == {"huggingface.co", "telemetry.qdrant.io"}
+
+
 @pytest.mark.parametrize(
     "qname, expected",
     [
-        ("telemetry.qdrant.io.rag.svc.cluster.local.", "telemetry.qdrant.io"),
+        ("huggingface.co.rag.svc.cluster.local.", "huggingface.co"),
+        ("huggingface.co.svc.cluster.local", "huggingface.co"),
+        ("huggingface.co.cluster.local", "huggingface.co"),
+        ("huggingface.co", "huggingface.co"),
+        ("telemetry.qdrant.io.rag.svc.cluster.local", "telemetry.qdrant.io"),
         ("telemetry.qdrant.io.svc.cluster.local", "telemetry.qdrant.io"),
+        ("telemetry.qdrant.io.cluster.local", "telemetry.qdrant.io"),
         ("telemetry.qdrant.io", "telemetry.qdrant.io"),
         ("qdrant.rag.svc.cluster.local", None),
-        ("qdrant.svc.cluster.local", None),
         ("kube-dns.kube-system.svc.cluster.local", None),
         ("20.0.244.10.in-addr.arpa", None),
     ],
 )
-def test_external_name(qname, expected):
-    assert external_name(qname, "rag") == expected
+def test_every_search_variant_counts_as_the_same_name(qname, expected):
+    """한 외부 이름의 모든 검색 경로 형태를 같은 규칙으로 센다(2점짜리 이름도 예외 없음)."""
+    externals = external_names(QNAMES, "rag")
+    assert canonical_name(qname, "rag", externals) == expected
 
 
 def test_host_search_domain_is_folded_into_original_name():
     domain = ("abc.xx.internal.cloudapp.net",)
-    assert external_name("huggingface.co.abc.xx.internal.cloudapp.net.", "rag", domain) == (
-        "huggingface.co"
-    )
-    assert external_name("qdrant.rag.svc.cluster.local", "rag", domain) is None
+    names = ["huggingface.co.abc.xx.internal.cloudapp.net", "huggingface.co.rag.svc.cluster.local"]
+    externals = external_names(names, "rag", domain)
+    assert externals == {"huggingface.co"}
+    assert canonical_name(names[0], "rag", externals, domain) == "huggingface.co"
+    assert canonical_name("qdrant.rag.svc.cluster.local", "rag", externals, domain) is None
 
 
 def test_stage_boundaries():
@@ -135,11 +170,12 @@ def test_injected_leak_is_found_and_fails_gate(leak_run, empty_allowlist, tmp_pa
             r["destination"],
             r["port"],
             r["attempts"],
-            r["left_node"],
+            r["left_cluster"],
         )
         for r in rows
     ] == [
-        ("rag", "idle", "dns", "leak.example.test", 53, 2, 0),
+        # 질의 2건(검색 경로 형태 + 그대로), CoreDNS가 상위로 넘긴 질의 1건
+        ("rag", "idle", "dns", "leak.example.test", 53, 2, 1),
         # 첫 SYN은 eth0 사본이 있어 밖으로 나갔고, 1초 뒤 재전송은 정책에 막혀 사본이 없다.
         ("rag", "idle", "tcp", "leak.example.test", 443, 2, 1),
     ]

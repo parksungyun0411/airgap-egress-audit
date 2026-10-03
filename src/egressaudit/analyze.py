@@ -27,7 +27,7 @@ FINDING_COLUMNS = [
     "ip",
     "port",
     "attempts",
-    "left_node",
+    "left_cluster",
     "first_seen_s",
 ]
 
@@ -91,36 +91,53 @@ def stage_of(ts: float, stages: dict) -> str | None:
     return None
 
 
-def external_name(qname: str, namespace: str, host_search: tuple[str, ...] = ()) -> str | None:
-    """클러스터 검색 도메인을 떼고 남은 이름이 외부 이름이면 돌려준다.
+CLUSTER_SUFFIXES = ("{ns}.svc.cluster.local", "svc.cluster.local", "cluster.local")
 
-    노드 resolv.conf의 검색 도메인(예: 클라우드 러너의 *.internal.cloudapp.net)이 붙은 질의는
-    그 도메인을 떼어 원래 이름으로 합친다.
-    """
-    name = qname.rstrip(".").lower()
+
+def _strip_host_search(name: str, host_search: tuple[str, ...]) -> str:
     for domain in host_search:
         if name.endswith("." + domain.lower()):
-            name = name[: -len(domain) - 1]
-            break
-    if name.endswith((".in-addr.arpa", ".ip6.arpa")):
-        return None
-    # 검색 도메인 순서대로 떼어 본다. 남은 부분이 클러스터 안 이름 꼴이면 내부 조회다.
-    for suffix, internal_dots in (
-        (f".{namespace}.svc.cluster.local", 0),  # <svc>
-        (".svc.cluster.local", 1),  # <svc>.<ns>
-        (".cluster.local", None),  # <...>.svc / <...>.pod
-    ):
-        if name.endswith(suffix):
-            rest = name[: -len(suffix)]
-            if internal_dots is None:
-                if rest.endswith((".svc", ".pod")) or "." not in rest:
-                    return None
-            elif rest.count(".") <= internal_dots:
-                return None
-            return rest
-    if name.endswith("cluster.local"):
-        return None
+            return name[: -len(domain) - 1]
     return name
+
+
+def external_names(qnames, namespace: str, host_search: tuple[str, ...] = ()) -> set[str]:
+    """질의 이름들에서 외부 이름 집합을 만든다.
+
+    - 클러스터 검색 도메인이 붙지 않은 이름(역방향 조회 제외)
+    - `<이름>.<ns>.svc.cluster.local` 꼴에서 <이름>에 점이 있는 것(검색 경로가 처음 붙이는 형태)
+    """
+    out: set[str] = set()
+    ns_suffix = "." + CLUSTER_SUFFIXES[0].format(ns=namespace)
+    for q in qnames:
+        name = _strip_host_search(q.rstrip(".").lower(), host_search)
+        if name.endswith((".in-addr.arpa", ".ip6.arpa")):
+            continue
+        if name.endswith(ns_suffix):
+            rest = name[: -len(ns_suffix)]
+            if "." in rest:
+                out.add(rest)
+        elif not name.endswith("cluster.local"):
+            out.add(name)
+    return out
+
+
+def canonical_name(
+    qname: str, namespace: str, externals: set[str], host_search: tuple[str, ...] = ()
+) -> str | None:
+    """질의가 외부 이름의 한 형태이면 그 외부 이름을, 아니면 None을 돌려준다.
+
+    한 외부 이름에 대해 그대로 묻는 것, 클러스터 검색 도메인 세 가지를 붙인 것,
+    노드 검색 도메인을 붙인 것을 모두 같은 이름의 시도로 센다.
+    """
+    name = _strip_host_search(qname.rstrip(".").lower(), host_search)
+    if name in externals:
+        return name
+    for suffix in CLUSTER_SUFFIXES:
+        suffix = "." + suffix.format(ns=namespace)
+        if name.endswith(suffix) and name[: -len(suffix)] in externals:
+            return name[: -len(suffix)]
+    return None
 
 
 def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
@@ -130,19 +147,27 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
     pod_udp_keys: set[tuple] = set()
     queries: dict[tuple, str] = {}
     ip_names: dict[str, str] = {}
+    dns_clients: list[tuple[float, str, str]] = []  # (ts, 외부 이름, 구성 요소)
+    coredns_ips = {ip for ip, (ns, comp) in ctx.pods.items() if comp == "kube-dns"}
+    externals = external_names(
+        (p.qname for p in packets if p.kind == "dns_query"), ctx.namespace, ctx.host_search
+    )
 
-    # 노드 eth0으로 NAT되어 나간 사본이 있으면 정책이 버리지 못하고 밖으로 나간 시도다.
+    def canon(qname: str) -> str | None:
+        return canonical_name(qname, ctx.namespace, externals, ctx.host_search)
+
+    # TCP·UDP: 노드 eth0으로 NAT되어 나간 사본이 있으면 정책이 버리지 못하고 밖으로 나간 시도다.
     nat_copies = [
         (p.seq, p.sport, p.dst, p.dport, p.ts)
         for p in packets
         if p.iface == "eth0" and p.direction == "Out" and p.src in ctx.node_ips
     ]
 
-    def left_node(p: Packet) -> bool:
+    def left_cluster(p: Packet) -> bool:
         key = (p.seq, p.sport, p.dst, p.dport)
         return any(c[:4] == key and abs(c[4] - p.ts) < 0.05 for c in nat_copies)
 
-    def add(component, ts, protocol, destination, ip, port, escaped=False):
+    def add(component, ts, protocol, destination, ip, port, escaped=False, attempt=True):
         stage = stage_of(ts, stages)
         if stage is None:
             return
@@ -154,15 +179,17 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
                 "stage": stage,
                 "protocol": protocol,
                 "destination": destination,
-                "ip": ip,
+                "ip": set(),
                 "port": port,
                 "attempts": 0,
-                "left_node": 0,
+                "left_cluster": 0,
                 "first_seen_s": round(ts - t0, 1),
             },
         )
-        row["attempts"] += 1
-        row["left_node"] += int(escaped)
+        if ip:
+            row["ip"].add(ip)
+        row["attempts"] += int(attempt)
+        row["left_cluster"] += int(escaped)
 
     # 1차: DNS 질의·응답을 짝지어 IP → 이름 표를 만든다. 클라이언트 쪽 사본(서비스 IP 방향)만 쓴다.
     for p in packets:
@@ -172,9 +199,7 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
             name = queries.get((p.dst, p.dport, p.dns_id))
             if name:
                 for ip in p.answers:
-                    ip_names.setdefault(
-                        ip, external_name(name, ctx.namespace, ctx.host_search) or name
-                    )
+                    ip_names.setdefault(ip, canon(name) or name)
 
     def from_pod(p: Packet) -> bool:
         return p.iface.startswith("veth") and p.direction == "In" and p.src not in ctx.node_ips
@@ -187,9 +212,16 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
         if not from_pod(p):
             continue
         if p.kind == "dns_query" and p.dst == ctx.kube_dns_ip:
-            name = external_name(p.qname, ctx.namespace, ctx.host_search)
+            name = canon(p.qname)
             if name:
+                dns_clients.append((p.ts, name, ctx.component(p.src)))
                 add(ctx.component(p.src), p.ts, "dns", name, "", 53)
+        elif p.kind == "dns_query" and p.src in coredns_ips and not ctx.internal(p.dst):
+            # CoreDNS가 외부 이름을 상위 리졸버로 넘긴 질의. 직전에 그 이름을 물은 구성 요소의 행에 센다.
+            name = canon(p.qname) or p.qname
+            asked = [c for c in dns_clients if c[1] == name and 0 <= p.ts - c[0] < 5]
+            comp = asked[-1][2] if asked else "kube-system/coredns"
+            add(comp, asked[-1][0] if asked else p.ts, "dns", name, "", 53, True, attempt=False)
         elif p.kind == "syn":
             pod_syn_seqs.add(p.seq)
             if not ctx.internal(p.dst):
@@ -200,16 +232,15 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
                     ip_names.get(p.dst, p.dst),
                     p.dst,
                     p.dport,
-                    left_node(p),
+                    left_cluster(p),
                 )
         elif p.kind == "udp":
             if ctx.internal(p.dst):
                 continue
             comp = ctx.component(p.src)
-            # CoreDNS가 상위 리졸버로 넘기는 질의는 위의 클라이언트 질의로 이미 기록했다.
-            if p.dport == 53 and comp.endswith("coredns"):
+            if p.dport == 53 and p.src in coredns_ips:
                 continue
-            add(comp, p.ts, "udp", ip_names.get(p.dst, p.dst), p.dst, p.dport, left_node(p))
+            add(comp, p.ts, "udp", ip_names.get(p.dst, p.dst), p.dst, p.dport, left_cluster(p))
 
     # 2차: 노드 자신(containerd·kubelet)이 밖으로 보낸 것. 파드 패킷이 NAT되어 나간 사본은 뺀다.
     for p in packets:
@@ -222,8 +253,13 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
         elif p.kind in ("udp", "dns_query") and (p.sport, p.dst, p.dport) not in pod_udp_keys:
             add("node", p.ts, "udp", p.qname or p.dst, p.dst, p.dport, True)
 
+    for row in agg.values():
+        row["ip"] = " ".join(sorted(row["ip"], key=lambda a: tuple(int(x) for x in a.split("."))))
     order = {s: i for i, s in enumerate(STAGES)}
-    return sorted(agg.values(), key=lambda r: (r["component"], order[r["stage"]], r["destination"]))
+    return sorted(
+        agg.values(),
+        key=lambda r: (r["component"], order[r["stage"]], r["destination"], r["protocol"]),
+    )
 
 
 def analyze_dir(run_dir: Path) -> list[dict]:
