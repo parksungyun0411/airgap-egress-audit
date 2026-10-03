@@ -1,0 +1,8 @@
+# 허용하는 외부 호출 목록. 비어 있으면 '외부 호출 0건'을 요구한다.
+# 항목을 추가할 때는 이유를 같이 적는다. 예:
+#
+# [[allow]]
+# component = "qdrant"
+# destination = "telemetry.qdrant.io"
+# port = 443
+# reason = "..."

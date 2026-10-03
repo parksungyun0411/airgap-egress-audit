@@ -1,0 +1,9 @@
+1100.000000 vethaaaa In  IP 10.244.0.20.40100 > 10.96.0.10.53: 200+ A? leak.example.test.rag.svc.cluster.local. (60)
+1100.001000 vethaaaa Out IP 10.96.0.10.53 > 10.244.0.20.40100: 200 NXDomain*- 0/1/0 (150)
+1100.002000 vethaaaa In  IP 10.244.0.20.40101 > 10.96.0.10.53: 201+ A? leak.example.test. (35)
+1100.003000 vethcccc In  IP 10.244.0.3.50000 > 192.168.5.2.53: 77+ A? leak.example.test. (35)
+1100.004000 eth0  Out IP 172.18.0.2.50000 > 192.168.5.2.53: 77+ A? leak.example.test. (35)
+1100.010000 vethaaaa Out IP 10.96.0.10.53 > 10.244.0.20.40101: 201 1/0/0 A 203.0.113.10 (51)
+1100.020000 vethaaaa In  IP 10.244.0.20.40200 > 203.0.113.10.443: Flags [S], seq 900, win 64240, length 0
+1100.021000 eth0  Out IP 172.18.0.2.40200 > 203.0.113.10.443: Flags [S], seq 900, win 64240, length 0
+1101.020000 vethaaaa In  IP 10.244.0.20.40200 > 203.0.113.10.443: Flags [S], seq 900, win 64240, length 0

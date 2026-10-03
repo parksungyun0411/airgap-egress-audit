@@ -1,0 +1,2 @@
+{"ts": 1001.0, "pods": [{"ns": "kube-system", "name": "coredns-abc", "component": "kube-dns", "ip": "10.244.0.3", "hostNetwork": false}]}
+{"ts": 1006.0, "pods": [{"ns": "kube-system", "name": "coredns-abc", "component": "kube-dns", "ip": "10.244.0.3", "hostNetwork": false}, {"ns": "rag", "name": "rag-1", "component": "rag", "ip": "10.244.0.20", "hostNetwork": false}, {"ns": "rag", "name": "qdrant-1", "component": "qdrant", "ip": "10.244.0.21", "hostNetwork": false}]}
