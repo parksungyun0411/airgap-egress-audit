@@ -1,0 +1,42 @@
+# EKS 변형(작성만 했고 실행하지 않았다. 측정 전). 끝나면 infra/teardown.sh로 그날 지운다.
+# 생성: eksctl create cluster -f infra/eksctl/cluster.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: airgap-audit
+  region: ap-northeast-2
+  version: "1.35"
+  tags:
+    project: airgap-egress-audit
+
+# NAT 게이트웨이를 만들지 않는다. 감사 대상 네임스페이스의 egress는 NetworkPolicy로 막는다.
+vpc:
+  nat:
+    gateway: Disable
+
+iam:
+  withOIDC: true
+
+addons:
+  # VPC CNI의 NetworkPolicy 적용과 정책 판정 로그(ACCEPT/DENY)를 켠다.
+  # 로그 위치: 노드의 /var/log/aws-routed-eni/network-policy-agent.log
+  # https://docs.aws.amazon.com/eks/latest/userguide/network-policies-troubleshooting.html
+  - name: vpc-cni
+    configurationValues: '{"enableNetworkPolicy":"true","nodeAgent":{"enablePolicyEventLogs":"true"}}'
+    resolveConflicts: overwrite
+  - name: coredns
+  - name: kube-proxy
+
+managedNodeGroups:
+  # 4 vCPU·16GiB x86 노드 1대. 리전 제공 여부와 시간당 요금은 생성 전에 확인한다.
+  - name: audit-ng
+    instanceType: m7i.xlarge
+    amiFamily: AmazonLinux2023
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    volumeSize: 40
+    privateNetworking: false
+    tags:
+      project: airgap-egress-audit

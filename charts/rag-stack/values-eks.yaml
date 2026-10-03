@@ -1,0 +1,21 @@
+# EKS 변형(작성만 했고 실행하지 않았다. 측정 전).
+# 노드에 hostPath 모델이 없으므로 모델을 넣은 이미지(images/*.Dockerfile)를 ECR에서 받는다.
+# 이미지 주소는 배포 워크플로가 --set components.<name>.image=... 로 넣는다.
+imagePullPolicy: IfNotPresent
+components:
+  llm:
+    image: REGISTRY/airgap-llm:TAG
+    volumeMounts: []
+    volumes: []
+  embed:
+    image: REGISTRY/airgap-embed:TAG
+    args: ["--model-id", "/models/e5"]
+    env:
+      HUGGINGFACE_HUB_CACHE: /tmp
+    volumeMounts: []
+    volumes: []
+  qdrant:
+    env:
+      QDRANT__TELEMETRY_DISABLED: "true"
+  rag:
+    image: REGISTRY/airgap-rag-app:TAG

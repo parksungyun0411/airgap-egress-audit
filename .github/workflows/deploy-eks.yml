@@ -1,0 +1,83 @@
+name: deploy-eks
+
+# EKS 변형(작성만 했고 실행하지 않았다). 모델 내장 이미지 빌드 → ECR 푸시 → Helm 배포.
+# 클러스터 비용이 들기 때문에 수동 실행만 받는다.
+#   secret   AWS_ROLE_ARN       OIDC로 맡을 IAM 역할(infra/iam/setup-github-oidc.sh)
+#   variable AWS_REGION         기본 ap-northeast-2
+#   variable EKS_CLUSTER_NAME   기본 airgap-audit
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-eks
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
+  EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME || 'airgap-audit' }}
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS 역할 설정 확인
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+        run: |
+          if [ -z "$AWS_ROLE_ARN" ]; then
+            echo "::error title=AWS 역할 없음::secret AWS_ROLE_ARN이 없다. infra/iam/setup-github-oidc.sh로 역할을 만들고 저장소 secret에 넣은 뒤 다시 실행한다."
+            exit 1
+          fi
+
+  release:
+    needs: preflight
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      # 장기 액세스 키 없이 GitHub OIDC 토큰으로 역할을 맡는다.
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: 임베딩 모델 준비(amd64 TEI로 캐시를 데운 뒤 링크를 풀어 복사)
+        run: |
+          scripts/fetch_models.sh
+          mkdir -p build
+          cp -rL models/hf-cache/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3 build/e5
+
+      - name: 이미지 빌드·푸시
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          docker buildx build --platform linux/amd64 --push -t "$REGISTRY/airgap-llm:$GITHUB_SHA" -f images/llm.Dockerfile images
+          docker buildx build --platform linux/amd64 --push -t "$REGISTRY/airgap-embed:$GITHUB_SHA" -f images/embed.Dockerfile .
+          docker buildx build --platform linux/amd64 --push -t "$REGISTRY/airgap-rag-app:$GITHUB_SHA" app
+
+      - uses: azure/setup-helm@v5
+
+      - name: helm upgrade
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+          helm upgrade --install rag charts/rag-stack -n rag \
+            -f charts/rag-stack/values.yaml -f charts/rag-stack/values-eks.yaml \
+            --set components.llm.image="$REGISTRY/airgap-llm:$GITHUB_SHA" \
+            --set components.embed.image="$REGISTRY/airgap-embed:$GITHUB_SHA" \
+            --set components.rag.image="$REGISTRY/airgap-rag-app:$GITHUB_SHA" \
+            --wait --timeout 20m
+          kubectl -n rag get pods -o wide
