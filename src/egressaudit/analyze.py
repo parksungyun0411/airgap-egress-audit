@@ -38,6 +38,7 @@ class Context:
     namespace: str
     node_ips: set[str]
     internal_nets: list
+    host_search: tuple[str, ...] = ()
     pods: dict[str, tuple[str, str]] = field(default_factory=dict)  # ip -> (ns, component)
 
     @classmethod
@@ -49,6 +50,7 @@ class Context:
             namespace=meta["namespace"],
             node_ips=set(meta["node_ips"]),
             internal_nets=nets,
+            host_search=tuple(meta.get("search_domains", [])),
         )
 
     def internal(self, ip: str) -> bool:
@@ -89,9 +91,17 @@ def stage_of(ts: float, stages: dict) -> str | None:
     return None
 
 
-def external_name(qname: str, namespace: str) -> str | None:
-    """클러스터 검색 도메인을 떼고 남은 이름이 외부 이름이면 돌려준다."""
+def external_name(qname: str, namespace: str, host_search: tuple[str, ...] = ()) -> str | None:
+    """클러스터 검색 도메인을 떼고 남은 이름이 외부 이름이면 돌려준다.
+
+    노드 resolv.conf의 검색 도메인(예: 클라우드 러너의 *.internal.cloudapp.net)이 붙은 질의는
+    그 도메인을 떼어 원래 이름으로 합친다.
+    """
     name = qname.rstrip(".").lower()
+    for domain in host_search:
+        if name.endswith("." + domain.lower()):
+            name = name[: -len(domain) - 1]
+            break
     if name.endswith((".in-addr.arpa", ".ip6.arpa")):
         return None
     # 검색 도메인 순서대로 떼어 본다. 남은 부분이 클러스터 안 이름 꼴이면 내부 조회다.
@@ -162,7 +172,9 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
             name = queries.get((p.dst, p.dport, p.dns_id))
             if name:
                 for ip in p.answers:
-                    ip_names.setdefault(ip, external_name(name, ctx.namespace) or name)
+                    ip_names.setdefault(
+                        ip, external_name(name, ctx.namespace, ctx.host_search) or name
+                    )
 
     def from_pod(p: Packet) -> bool:
         return p.iface.startswith("veth") and p.direction == "In" and p.src not in ctx.node_ips
@@ -175,7 +187,7 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
         if not from_pod(p):
             continue
         if p.kind == "dns_query" and p.dst == ctx.kube_dns_ip:
-            name = external_name(p.qname, ctx.namespace)
+            name = external_name(p.qname, ctx.namespace, ctx.host_search)
             if name:
                 add(ctx.component(p.src), p.ts, "dns", name, "", 53)
         elif p.kind == "syn":

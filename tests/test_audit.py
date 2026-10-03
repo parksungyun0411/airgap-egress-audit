@@ -92,6 +92,14 @@ def test_external_name(qname, expected):
     assert external_name(qname, "rag") == expected
 
 
+def test_host_search_domain_is_folded_into_original_name():
+    domain = ("abc.xx.internal.cloudapp.net",)
+    assert external_name("huggingface.co.abc.xx.internal.cloudapp.net.", "rag", domain) == (
+        "huggingface.co"
+    )
+    assert external_name("qdrant.rag.svc.cluster.local", "rag", domain) is None
+
+
 def test_stage_boundaries():
     assert stage_of(1000.0, STAGES) == "install"
     assert stage_of(1010.0, STAGES) == "startup"

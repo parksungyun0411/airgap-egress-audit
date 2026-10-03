@@ -115,7 +115,7 @@ brew uninstall colima docker kind kubernetes-cli lima
 | 워크플로 | 시점 | 내용 |
 |---|---|---|
 | `ci.yml` | push·PR | ruff, pytest(누출 픽스처 포함), 커밋된 최신 `reports/kind-*/after`에 대한 게이트, Helm lint·kubeconform, hadolint, shellcheck, actionlint |
-| `audit.yml` | 수동 | ubuntu 러너의 kind에서 before·after·leak 감사, after는 통과하고 leak은 실패해야 성공 |
+| `audit.yml` | 수동 | ubuntu 러너의 kind에서 before·after·leak 감사, after는 통과하고 leak은 실패해야 성공. 한 번 실행에 약 2시간이 걸려 push마다 돌리지 않습니다 |
 | `deploy-eks.yml` | 수동 | EKS 변형 배포(작성만 했고 실행하지 않았습니다) |
 
 ## 평가
@@ -180,7 +180,7 @@ airgap-egress-audit/
 - kind 감사는 한 번씩만 실행했습니다(before·after·leak 각 1회). 기동 직후 정책 틈은 세 번의 점검에서 모두 재현되었지만, 그 길이는 재지 않았습니다.
 - 이번 실행의 `host-images.txt`(레지스트리 digest)는 감사 직후 같은 로컬 이미지 저장소에서 기록했습니다. 이후 실행부터는 감사 스크립트가 실행 중에 기록합니다.
 - EKS 변형(VPC CNI 정책 판정 로그)은 작성만 했고 실행하지 않았습니다. 측정 전입니다.
-- `audit.yml`(GitHub 러너의 kind 감사)는 amd64 TEI 이미지를 쓰며, 이 저장소의 표는 그 결과가 아닙니다.
+- `audit.yml`(GitHub ubuntu 러너의 kind 감사)는 2026-10-03에 한 번 끝까지 돌았고(run 37110210642, 약 1시간 53분), after는 게이트를 통과하고 leak은 실패했습니다. 다만 세 실행 모두 `llm`(llama-server) 파드가 25분 안에 Ready가 되지 않았고 로그가 비어 있어 원인을 확인하지 못했습니다. 그래서 러너 결과는 before·after 비교로 쓰지 않으며, 이 문서의 표는 그 결과가 아닙니다. 이후 실행부터는 `pods-describe.txt`를 함께 남깁니다.
 
 ## 라이선스
 

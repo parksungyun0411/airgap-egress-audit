@@ -91,6 +91,7 @@ log "정책 점검: $(tail -1 "$OUT/policy-check.txt")"
 SERVICE_CIDR="$(kubectl -n kube-system get pod -l component=kube-apiserver -o json \
   | python3 -c 'import json,sys; a=json.load(sys.stdin)["items"][0]["spec"]["containers"][0]["command"]; print([x.split("=",1)[1] for x in a if x.startswith("--service-cluster-ip-range")][0])')"
 POD_CIDR="$(kubectl -n kube-system get ds kindnet -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="POD_SUBNET")].value}')"
+SEARCH_DOMAINS="$(docker exec "$NODE" sh -c "awk '/^search/ {for (i=2;i<=NF;i++) print \$i}' /etc/resolv.conf" | tr '\n' ' ')"
 python3 - "$OUT/meta.json" <<EOF
 import json, subprocess, sys
 dns = subprocess.check_output(["kubectl","-n","kube-system","get","svc","kube-dns","-o","jsonpath={.spec.clusterIP}"], text=True)
@@ -98,6 +99,7 @@ nodes = json.loads(subprocess.check_output(["kubectl","get","nodes","-o","json"]
 ips = [a["address"] for n in nodes["items"] for a in n["status"]["addresses"] if a["type"] == "InternalIP"]
 json.dump({"kube_dns_ip": dns, "pod_cidr": "$POD_CIDR", "service_cidr": "$SERVICE_CIDR",
            "node_ips": ips, "namespace": "$NS", "profile": "$PROFILE",
+           "search_domains": "$SEARCH_DOMAINS".split(),
            "idle_seconds": int("$IDLE_SECONDS")}, open(sys.argv[1], "w"), indent=2)
 EOF
 
@@ -169,6 +171,7 @@ sleep 2
 docker logs egress-capture > "$OUT/capture.txt" 2>/dev/null
 kubectl -n kube-system logs -l k8s-app=kube-dns --timestamps --tail=-1 --prefix > "$OUT/coredns.log"
 helm get values rag -n "$NS" --all > "$OUT/values.yaml"
+kubectl -n "$NS" describe pods > "$OUT/pods-describe.txt" 2>&1 || true
 for c in llm embed qdrant rag; do kubectl -n "$NS" logs "deploy/$c" --timestamps > "$OUT/log-$c.txt" 2>&1 || true; done
 {
   echo "kind: $(kind version)"

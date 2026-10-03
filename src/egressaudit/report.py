@@ -31,6 +31,7 @@ RAW_FILES = [
     "versions.txt",
     "images.txt",
     "host-images.txt",
+    "pods-describe.txt",
     "policy-check.txt",
     "values.yaml",
     "first-request.json",
