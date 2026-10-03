@@ -14,7 +14,10 @@ NODE="${CLUSTER}-control-plane"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CAPTURE_IMAGE="nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70"
 ARCH="$(docker info --format '{{.Architecture}}' | sed 's/aarch64/arm64/; s/x86_64/amd64/')"
-TEI_IMAGE="${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-$([[ $ARCH == arm64 ]] && echo arm64-)1.9.4}"
+# TEI의 CPU 이미지는 아키텍처마다 태그가 다르다.
+TEI_TAG="cpu-1.9.4"
+if [[ $ARCH == arm64 ]]; then TEI_TAG="cpu-arm64-1.9.4"; fi
+TEI_IMAGE="${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:$TEI_TAG}"
 IMAGES=(
   ghcr.io/ggml-org/llama.cpp:server-b11347
   "$TEI_IMAGE"

@@ -8,7 +8,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MODELS="$ROOT/models"
 ARCH="$(docker info --format '{{.Architecture}}' | sed 's/aarch64/arm64/; s/x86_64/amd64/')"
-TEI_IMAGE="${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-$([[ $ARCH == arm64 ]] && echo arm64-)1.9.4}"
+# TEI의 CPU 이미지는 아키텍처마다 태그가 다르다.
+TEI_TAG="cpu-1.9.4"
+if [[ $ARCH == arm64 ]]; then TEI_TAG="cpu-arm64-1.9.4"; fi
+TEI_IMAGE="${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:$TEI_TAG}"
 GGUF_URL="https://huggingface.co/DevQuasar/kakaocorp.kanana-1.5-2.1b-instruct-2505-GGUF/resolve/4d3b6203857d893ebfcaca6c51901e3ea1d00d00/kakaocorp.kanana-1.5-2.1b-instruct-2505.Q4_K_M.gguf"
 GGUF_SHA256="24d3db59d0af2c85c0afc0bbc99da1174b73ef6728bce2650bd91bec28ad1c81"
 GGUF="$MODELS/kanana-1.5-2.1b-instruct-q4_k_m.gguf"
