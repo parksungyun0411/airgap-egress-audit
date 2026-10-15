@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/parksungyun0411/airgap-egress-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/parksungyun0411/airgap-egress-audit/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white) ![kind](https://img.shields.io/badge/kind-v0.33.0-326CE5?logo=kubernetes&logoColor=white) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-한국어 소형 LLM과 RAG 스택을 egress가 막힌 쿠버네티스 네임스페이스에 설치하고, 설치·기동·첫 요청·유휴 네 단계에서 밖으로 나가려는 시도를 모두 기록합니다. 기록한 시도를 설정으로 막은 뒤, "외부 호출 0건"을 회귀 게이트로 고정하는 프로젝트입니다.
+한국어 소형 LLM과 RAG 스택을 egress가 막힌 쿠버네티스 네임스페이스에 설치하고, 설치·기동·첫 요청·유휴 네 단계에서 밖으로 나가려는 시도(IPv4 TCP SYN·UDP 패킷과 DNS 질의)를 기록합니다. 기록한 시도를 설정으로 막은 뒤, "외부 호출 0건"을 회귀 게이트로 검사하는 프로젝트입니다. push마다 도는 CI는 커밋한 감사 기록을 다시 분석해 게이트를 검사하고, 클러스터 감사 자체는 수동 워크플로로 다시 돌립니다.
 
 폐쇄망 반입은 보통 "필요한 이미지와 모델 파일을 모두 들고 들어가면 끝난다"고 가정합니다. 실제로는 파일이 다 있어도 구성 요소가 기동하면서 허브에 메타데이터를 묻거나 사용 통계를 보내려 하고, 막힌 요청마다 타임아웃을 기다리느라 기동이 늦어집니다. 이 프로젝트는 그런 시도를 문서가 아니라 패킷으로 확인합니다. 이미지와 모델을 클러스터에 미리 넣어 두었으므로, 그 상태에서도 밖으로 나가려는 시도가 있으면 그것이 곧 발견 사항입니다.
 
@@ -128,7 +128,7 @@ brew uninstall colima docker kind kubernetes-cli lima
 
 | 구성 요소 | before에서 관찰한 시도 | 단계 | 완화 | after |
 |---|---|---|---|---|
-| embed (TEI 1.9.4) | `huggingface.co` DNS 질의 32회(그중 6회는 CoreDNS가 상위 리졸버로 넘김), TCP 443 SYN 109회(CloudFront IP 4개). 첫 SYN 1회는 클러스터 밖으로 나갔습니다(허브가 404로 응답한 로그가 남음) | 설치·기동 | 허브 모델 ID 대신 로컬 스냅숏 경로를 `--model-id`로 지정 | 0 |
+| embed (TEI 1.9.4) | `huggingface.co` DNS 질의 32회(그중 6회는 CoreDNS가 상위 리졸버로 넘김), TCP 443 SYN 109회(재전송 포함, 서로 다른 연결 13개, AWS 공개 IP 대역 기준 CloudFront IP 4개). 첫 SYN 1회는 클러스터 밖으로 나갔습니다(허브가 404로 응답한 로그가 남음) | 설치·기동 | 허브 모델 ID 대신 로컬 스냅숏 경로를 `--model-id`로 지정 | 0 |
 | qdrant (1.19.1) | `telemetry.qdrant.io` DNS 질의 8회(그중 2회는 상위 리졸버로 넘어감), TCP 443 SYN 1회. 이 SYN은 클러스터 밖으로 나갔습니다 | 설치 | `QDRANT__TELEMETRY_DISABLED=true` | 0 |
 | llm (llama.cpp b11347) | 관찰되지 않음 | — | 없음 | 0 |
 | rag (FastAPI 앱) | 관찰되지 않음 | — | 없음 | 0 |
@@ -138,6 +138,8 @@ brew uninstall colima docker kind kubernetes-cli lima
 |---|---:|---:|
 | 게이트 | FAIL (6행) | PASS (0건) |
 | Running → 전체 Ready | 364초 | 5초 |
+
+364초는 DNS는 풀리고 TCP는 정책이 조용히 버리는 이 kind 조건에서 잰 값입니다. 상위 리졸버가 없는 현장에서는 대기 시간이 다를 수 있습니다.
 
 before에서 TEI는 허브 요청이 막힐 때마다 약 120초씩 기다렸습니다. `before/log-embed.txt` 기준으로 모델 백엔드 시작(07:24:46) 뒤 07:26:47, 07:28:48, 07:30:49에 각각 다음 단계로 넘어갔고 07:30:50에 Ready가 되었습니다. 두 번째와 세 번째 대기는 허브 저장소에도 없는 `onnx/model.onnx_data`, `model.onnx_data`를 받으려던 것이고, 첫 번째 대기의 대상은 로그에 나오지 않습니다. Running에서 Ready까지 걸린 364초는 대부분 이 대기입니다. 허브에 없는 `config_sentence_transformers.json` 요청은 기동 직후라 실제로 나갔고 404를 받았습니다.
 
@@ -152,9 +154,9 @@ before에서 TEI는 허브 요청이 막힐 때마다 약 120초씩 기다렸습
 | 같은 새 파드, 약 0.5초 뒤 | 7/16 연결됨 |
 | 같은 새 파드, 약 1초 이후 | 0/64 연결됨 |
 
-이 환경에서는 정책 반영 지연은 시험 해상도 안에서 보이지 않았고, 정책이 이미 적용된 네임스페이스에서도 새로 뜬 파드가 첫 1초 안팎 동안 밖으로 나갈 수 있었습니다. before에서 클러스터 밖으로 나간 두 SYN(TEI 1.0초, Qdrant 0.6초)도 이 구간에 있고, leak의 1.5초 SYN은 막혔습니다. 원인은 확인하지 않았습니다. 이 틈 때문에 차단은 구성 요소 설정(after)으로 하고, 정책은 관찰 대상을 좁히는 장치로 씁니다.
+이 환경에서는 정책 반영 지연은 시험 해상도 안에서 보이지 않았고, 정책이 이미 적용된 네임스페이스에서도 새로 뜬 파드가 첫 1초 안팎 동안 밖으로 나갈 수 있었습니다. before에서 클러스터 밖으로 나간 두 SYN(helm 설치 시작 기준 TEI 1.0초, Qdrant 0.6초)도 이 구간에 있고, leak의 1.5초 SYN은 막혔습니다. 원인은 확인하지 않았습니다. 이 틈 때문에 차단은 구성 요소 설정(after)으로 하고, 정책은 관찰 대상을 좁히는 장치로 씁니다.
 
-누출 주입(`leak`): after 설정 위에 RAG 앱이 기동할 때 `https://example.com/`을 한 번 호출하도록 환경변수만 더했습니다. 감사는 `example.com` DNS 질의 8회(그중 2회는 상위 리졸버로 넘어감)와 TCP 443 SYN 10회(IP 2개, 모두 정책에 막힘)를 기록했고, 게이트는 3행으로 실패했습니다. 같은 동작을 합성 픽스처로 재현한 테스트가 CI에서 매번 돕니다.
+누출 주입(`leak`): after 설정 위에 RAG 앱이 기동할 때 `https://example.com/`을 한 번 호출하도록 환경변수만 더했습니다. 감사는 `example.com` DNS 질의 8회(그중 2회는 상위 리졸버로 넘어감)와 TCP 443 SYN 10회(재전송 포함, 서로 다른 연결 2개, IP 2개, 모두 정책에 막힘)를 기록했고, 게이트는 3행으로 실패했습니다. 같은 동작을 합성 픽스처로 재현한 테스트가 CI에서 매번 돕니다.
 
 ## 프로젝트 구조
 
@@ -192,11 +194,12 @@ airgap-egress-audit/
 - 유휴 600초 동안 관찰되지 않았다는 것은 호출이 없다는 증명이 아닙니다. 하루 단위 주기 작업, 특정 요청이나 오류에서만 생기는 호출, 버전 확인 같은 드문 동작은 놓칠 수 있습니다.
 - 시험한 구성 요소는 llama.cpp `llama-server` b11347, Text Embeddings Inference 1.9.4(arm64 CPU 이미지), Qdrant 1.19.1, 직접 만든 FastAPI 앱(qdrant-client 1.19.1, httpx 0.28.1)뿐입니다. 다른 버전이나 vLLM·Ollama 같은 다른 런타임에는 결과를 일반화할 수 없습니다.
 - 캡처는 IPv4의 TCP SYN과 UDP만 봅니다. IPv6, ICMP, 이미 맺어진 연결 위로 보내는 데이터는 기록하지 않습니다.
+- 캡처 필터는 컨트롤 플레인 포트(TCP 6443·10250·2379·2380·2381·10257·10259)와 UDP 8472를 목적지와 관계없이 뺍니다. 이 포트로 가는 외부 연결과, 노드 네트워크 네임스페이스 밖에서 일어나는 송출(docker 데몬, colima VM, docker 내장 DNS의 상위 질의)은 보이지 않습니다.
 - kind 감사는 한 번씩만 실행했습니다(before·after·leak 각 1회). 새 파드 틈은 클러스터 2개, 파드 16개에서 재현했지만 원인은 확인하지 않았고, 그 길이는 0.5초 간격 시도로만 쟀습니다.
 - DNS는 막지 않은 유출 경로입니다. NetworkPolicy는 CoreDNS까지 허용하고 CoreDNS는 외부 이름을 상위 리졸버로 넘기므로, after에서도 파드가 외부 이름을 물으면 그 이름은 클러스터 밖으로 나갑니다(after에서는 그런 질의가 관찰되지 않았습니다). 질의 이름에 데이터를 실어 보내는 방식은 이 감사와 정책으로 막을 수 없습니다.
 - 이번 실행의 `host-images.txt`(레지스트리 digest)는 감사 직후 같은 로컬 이미지 저장소에서 기록했습니다. 이후 실행부터는 감사 스크립트가 실행 중에 기록합니다.
 - EKS 변형(VPC CNI 정책 판정 로그)은 작성만 했고 실행하지 않았습니다. 측정 전입니다.
-- `audit.yml`(GitHub ubuntu 러너의 kind 감사)는 2026-10-03에 한 번 끝까지 돌았고(run 37110210642, 약 1시간 53분), after는 게이트를 통과하고 leak은 실패했습니다. 다만 세 실행 모두 `llm`(llama-server) 파드가 25분 안에 Ready가 되지 않았고 로그가 비어 있어 원인을 확인하지 못했습니다. 그래서 러너 결과는 before·after 비교로 쓰지 않으며, 이 문서의 표는 그 결과가 아닙니다. 이후 실행부터는 `pods-describe.txt`를 함께 남깁니다.
+- `audit.yml`(GitHub ubuntu 러너의 kind 감사)는 2026-10-03에 한 번 끝까지 돌았고(run 37110210642, 약 1시간 53분, 커밋 이력을 정리하기 전의 SHA `9093a51`에서 실행), after는 게이트를 통과하고 leak은 실패했습니다. 다만 세 실행 모두 `llm`(llama-server) 파드가 25분 안에 Ready가 되지 않았고 로그가 비어 있어 원인을 확인하지 못했습니다. 그래서 러너 결과는 before·after 비교로 쓰지 않으며, 이 문서의 표는 그 결과가 아닙니다. 이후 실행부터는 `pods-describe.txt`를 함께 남깁니다.
 
 ## 라이선스
 

@@ -18,8 +18,8 @@ A. 기존 파드(`cluster-*/A-existing-pod.txt`)
 
 | 클러스터 | 정책 전 | 정책 적용 후 첫 시도 |
 |---|---|---|
-| cluster-1 | CONNECTED | BLOCKED (`kubectl exec` 시작 기준 0.06초 뒤) |
-| cluster-2 | CONNECTED | BLOCKED (`kubectl exec` 시작 기준 0.06초 뒤) |
+| cluster-1 | CONNECTED | BLOCKED (정책 적용 명령 시작 0.06초 뒤에 시작한 `kubectl exec`의 첫 시도) |
+| cluster-2 | CONNECTED | BLOCKED (정책 적용 명령 시작 0.06초 뒤에 시작한 `kubectl exec`의 첫 시도) |
 
 `kubectl exec`가 파드 안에서 연결을 시작하기까지 걸리는 시간이 있어, 정책 반영 지연은 이 시험의 해상도보다 짧았다는 것만 말할 수 있다.
 

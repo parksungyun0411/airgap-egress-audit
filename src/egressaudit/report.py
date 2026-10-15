@@ -120,7 +120,7 @@ def run_section(label: str, run_dir: Path, out: Path) -> list[str]:
                     "목적지",
                     "IP",
                     "포트",
-                    "시도",
+                    "패킷·질의 수",
                     "클러스터 밖으로 나감",
                     "처음 본 시각(초)",
                 ],
@@ -188,9 +188,12 @@ def environment_section(runs: list[tuple[str, Path]]) -> list[str]:
     lines += [
         "읽는 법:",
         "",
-        "- `시도`(TCP·UDP): 파드 쪽 veth에서 잡힌 SYN·UDP 패킷 수. 재전송도 센다.",
         (
-            "- `시도`(DNS): 파드가 CoreDNS에 보낸 질의 중 같은 외부 이름의 모든 형태(이름 그대로, "
+            "- `패킷·질의 수`(TCP·UDP): 파드 쪽 veth에서 잡힌 SYN·UDP 패킷 수. 재전송도 세므로 "
+            "서로 다른 연결 수보다 클 수 있다."
+        ),
+        (
+            "- `패킷·질의 수`(DNS): 파드가 CoreDNS에 보낸 질의 중 같은 외부 이름의 모든 형태(이름 그대로, "
             "`<ns>.svc.cluster.local`·`svc.cluster.local`·`cluster.local`을 붙인 것, "
             "노드 검색 도메인을 붙인 것)를 A·AAAA 구분 없이 센 값."
         ),
