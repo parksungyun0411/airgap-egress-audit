@@ -22,7 +22,7 @@ import socket, time
 time.sleep($delay)
 s = socket.socket(); s.settimeout(5)
 try:
-    s.connect(('1.1.1.1', 443)); print('delay=${delay}s: CONNECTED (정책 미적용)')
+    s.connect(('1.1.1.1', 443)); print('delay=${delay}s: CONNECTED')
 except OSError as e:
     print('delay=${delay}s: BLOCKED', type(e).__name__)
 " >/dev/null

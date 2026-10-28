@@ -4,6 +4,23 @@
 scripts/policy_timing.sh <out-dir> 8   # 새 kind 클러스터 2개에서 한 번씩 실행
 ```
 
+스크립트는 클러스터를 만들거나 지우지 않고, 이름이 `airgap`인 kind 클러스터에 `airgap-rag-app:0.1.0` 이미지가 들어 있다고 가정한다. 클러스터 하나마다 다음 순서로 준비하고 실행한다.
+
+```bash
+kind create cluster --name airgap --wait 120s
+# 이미지 반입은 scripts/audit.sh 3단계와 같은 방식(amd64면 linux/amd64)
+docker save --platform linux/arm64 -o app.tar airgap-rag-app:0.1.0
+kind load image-archive --name airgap app.tar
+# colima 커널에 nfnetlink_queue가 없으면 정책이 적용되지 않는다(scripts/audit.sh 2단계와 같다)
+docker exec airgap-control-plane test -e /proc/net/netfilter/nfnetlink_queue || {
+  colima ssh -- sudo modprobe nfnetlink_queue
+  kubectl -n kube-system rollout restart ds/kindnet
+  kubectl -n kube-system rollout status ds/kindnet --timeout=120s
+}
+scripts/policy_timing.sh <out-dir> 8
+kind delete cluster --name airgap
+```
+
 환경: kind v0.33.0, kindnetd v20260820-69b56db7, kindest/node v1.37.0 (`cluster-*/versions.txt`).
 대상: `1.1.1.1:443`, 연결 제한시간 2초. 이미지는 `airgap-rag-app:0.1.0`(Python)을 썼다.
 
