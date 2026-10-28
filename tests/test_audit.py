@@ -135,6 +135,41 @@ def test_host_search_domain_is_folded_into_original_name():
     assert canonical_name("qdrant.rag.svc.cluster.local", "rag", externals, domain) is None
 
 
+def test_service_in_another_namespace_is_not_external():
+    names = [
+        "minio.storage.rag.svc.cluster.local",
+        "minio.storage.svc.cluster.local",
+        "kube-dns.kube-system.rag.svc.cluster.local",
+        "kubernetes.default.svc.rag.svc.cluster.local",
+        "huggingface.co.rag.svc.cluster.local",
+        "api.example.storage.rag.svc.cluster.local",
+    ]
+    externals = external_names(names, "rag", namespaces={"storage"})
+    assert externals == {"huggingface.co", "api.example.storage"}
+    assert canonical_name("minio.storage.svc.cluster.local", "rag", externals) is None
+
+
+def test_findings_skip_service_in_namespace_seen_in_pods():
+    ctx = Context.from_meta(
+        {
+            "kube_dns_ip": "10.96.0.10",
+            "pod_cidr": "10.244.0.0/16",
+            "service_cidr": "10.96.0.0/16",
+            "node_ips": ["172.18.0.2"],
+            "namespace": "rag",
+        }
+    )
+    ctx.pods = {"10.244.0.20": ("rag", "rag"), "10.244.0.30": ("storage", "minio")}
+    query = "{ts} vethaaaa In  IP 10.244.0.20.{port} > 10.96.0.10.53: {id}+ A? {name}. (60)"
+    packets = parse(
+        [
+            query.format(ts=1005.0, port=40100, id=300, name="minio.storage.rag.svc.cluster.local"),
+            query.format(ts=1005.1, port=40101, id=301, name="minio.storage.svc.cluster.local"),
+        ]
+    )
+    assert findings(packets, ctx, STAGES) == []
+
+
 def test_stage_boundaries():
     assert stage_of(1000.0, STAGES) == "install"
     assert stage_of(1010.0, STAGES) == "startup"

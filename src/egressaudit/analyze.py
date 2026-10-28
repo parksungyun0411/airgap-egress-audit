@@ -92,6 +92,7 @@ def stage_of(ts: float, stages: dict) -> str | None:
 
 
 CLUSTER_SUFFIXES = ("{ns}.svc.cluster.local", "svc.cluster.local", "cluster.local")
+K8S_NAMESPACES = ("default", "kube-system", "kube-public", "kube-node-lease")
 
 
 def _strip_host_search(name: str, host_search: tuple[str, ...]) -> str:
@@ -101,13 +102,19 @@ def _strip_host_search(name: str, host_search: tuple[str, ...]) -> str:
     return name
 
 
-def external_names(qnames, namespace: str, host_search: tuple[str, ...] = ()) -> set[str]:
+def external_names(
+    qnames, namespace: str, host_search: tuple[str, ...] = (), namespaces=()
+) -> set[str]:
     """질의 이름들에서 외부 이름 집합을 만든다.
 
     - 클러스터 검색 도메인이 붙지 않은 이름(역방향 조회 제외)
-    - `<이름>.<ns>.svc.cluster.local` 꼴에서 <이름>에 점이 있는 것(검색 경로가 처음 붙이는 형태)
+    - `<이름>.<ns>.svc.cluster.local` 꼴에서 <이름>에 점이 있는 것(검색 경로가 처음 붙이는 형태).
+      다만 <이름>이 `<서비스>.<네임스페이스>`나 `<서비스>.<네임스페이스>.svc`이고 그 네임스페이스가
+      알려진 것(`namespaces`, 대상 네임스페이스, 쿠버네티스 기본 네임스페이스)이면 다른 네임스페이스의
+      서비스 이름이므로 뺀다.
     """
     out: set[str] = set()
+    known = {namespace, *K8S_NAMESPACES, *namespaces}
     ns_suffix = "." + CLUSTER_SUFFIXES[0].format(ns=namespace)
     for q in qnames:
         name = _strip_host_search(q.rstrip(".").lower(), host_search)
@@ -115,7 +122,8 @@ def external_names(qnames, namespace: str, host_search: tuple[str, ...] = ()) ->
             continue
         if name.endswith(ns_suffix):
             rest = name[: -len(ns_suffix)]
-            if "." in rest:
+            labels = rest.removesuffix(".svc").split(".")
+            if "." in rest and not (len(labels) == 2 and labels[1] in known):
                 out.add(rest)
         elif not name.endswith("cluster.local"):
             out.add(name)
@@ -149,8 +157,12 @@ def findings(packets: list[Packet], ctx: Context, stages: dict) -> list[dict]:
     ip_names: dict[str, str] = {}
     dns_clients: list[tuple[float, str, str]] = []  # (ts, 외부 이름, 구성 요소)
     coredns_ips = {ip for ip, (ns, comp) in ctx.pods.items() if comp == "kube-dns"}
+    # 파드 기록(pods.jsonl)에 나온 네임스페이스를 클러스터 안 네임스페이스로 본다.
     externals = external_names(
-        (p.qname for p in packets if p.kind == "dns_query"), ctx.namespace, ctx.host_search
+        (p.qname for p in packets if p.kind == "dns_query"),
+        ctx.namespace,
+        ctx.host_search,
+        {ns for ns, _ in ctx.pods.values()},
     )
 
     def canon(qname: str) -> str | None:
