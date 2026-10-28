@@ -122,7 +122,7 @@ brew uninstall colima docker kind kubernetes-cli lima
 
 ## 평가
 
-따로 밝힌 것을 빼면 값의 출처는 [reports/kind-20261003/REPORT.md](reports/kind-20261003/REPORT.md)와 각 실행의 원자료(`capture.txt`, `log-*.txt`)이며, 실행 환경은 kind v0.33.0(Kubernetes v1.37.0, kindnetd v20260820) on macOS·colima 0.10.3, 유휴 관찰 600초입니다. "서로 다른 연결" 수는 REPORT.md에 없는 값으로, `capture.txt`의 SYN 중 출발 IP·출발 포트·목적지 IP·목적지 포트 조합이 다른 것을 셌습니다.
+따로 밝힌 것을 빼면 값의 출처는 [reports/kind-20261003/REPORT.md](reports/kind-20261003/REPORT.md)와 각 실행의 원자료(`capture.txt`, `log-*.txt`)이며, 실행 환경은 kind v0.33.0(Kubernetes v1.37.0, kindnetd v20260820) on macOS·colima 0.10.3, 유휴 관찰 600초입니다. "서로 다른 연결" 수는 REPORT.md에 없는 값으로, `capture.txt`에서 파드 쪽 veth에 In으로 잡힌 SYN 중 출발 IP·출발 포트·목적지 IP·목적지 포트 조합이 다른 것을 셌습니다(노드 eth0의 NAT 사본은 세지 않음).
 
 구성 요소별 외부 호출 시도(`before` → `after`):
 

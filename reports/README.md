@@ -36,7 +36,7 @@ reports/
 | `component` | 시도한 구성 요소(파드 IP로 귀속, 노드 자신이면 `node`) |
 | `stage` | 단계(install, startup, first_request, idle) |
 | `protocol` | dns, tcp, udp |
-| `destination` | 외부 이름(DNS 응답으로 알 수 있을 때) 또는 IP |
+| `destination` | DNS 행은 질의한 외부 이름(검색 경로 형태를 원래 이름으로 합침). TCP·UDP 행은 DNS 응답으로 이름을 알 수 있으면 그 이름, 아니면 IP(노드 자신이 보낸 DNS 질의는 질의 이름) |
 | `ip` | 그 행에서 연결을 시도한 모든 목적지 IP(DNS 행은 비어 있음) |
 | `port` | 목적지 포트 |
 | `attempts` | 패킷·질의 수(재전송 포함) |
